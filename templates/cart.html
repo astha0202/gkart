@@ -1,0 +1,224 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cart - Greatkart</title>
+
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+{% include 'extend-files/navbar.html' %}
+
+
+<div class="container mt-5 mb-5">
+
+    <h2 class="mb-4">Shopping Cart</h2>
+
+
+    {% if cart_items %}
+
+        <div class="row">
+
+            <div class="col-md-8">
+
+                {% for item in cart_items %}
+
+                    <div class="card mb-3">
+
+                        <div class="row no-gutters">
+
+                            <div class="col-md-4">
+
+                                {% if item.product.images %}
+
+                                    <img
+                                        src="{{ item.product.images.url }}"
+                                        class="card-img"
+                                        style="height:220px; object-fit:contain;"
+                                        alt="{{ item.product.product_name }}"
+                                    >
+
+                                {% endif %}
+
+                            </div>
+
+                            <div class="col-md-8">
+
+                                <div class="card-body">
+
+                                    <h5 class="card-title">
+                                        {{ item.product.product_name }}
+                                    </h5>
+
+
+                                    <p class="card-text">
+
+                                        Price:
+                                        <strong>
+                                            ₹{{ item.product.price }}
+                                        </strong>
+
+                                    </p>
+
+
+                                    <!-- QUANTITY -->
+                                    <form
+                                        method="POST"
+                                        action="{% url 'update_cart' item.id %}"
+                                        class="mb-3"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <label>
+                                            Quantity
+                                        </label>
+
+                                        <div class="d-flex">
+
+                                            <input
+                                                type="number"
+                                                name="quantity"
+                                                value="{{ item.quantity }}"
+                                                min="1"
+                                                max="{{ item.product.stock }}"
+                                                class="form-control"
+                                                style="width:100px;"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-primary ml-2"
+                                            >
+                                                Update
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+
+
+                                    <!-- SUBTOTAL -->
+
+                                    <p class="card-text">
+
+                                        Subtotal:
+
+                                        <strong>
+                                            ₹{% widthratio item.product.price 1 item.quantity %}
+                                        </strong>
+
+                                    </p>
+
+
+                                    <!-- REMOVE -->
+
+                                    <a
+                                        href="{% url 'remove_from_cart' item.id %}"
+                                        class="btn btn-danger"
+                                    >
+                                        Remove
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+<div class="col-md-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <h4 class="card-title">
+                Order Summary
+            </h4>
+
+            <hr>
+
+            <div class="d-flex justify-content-between mb-2">
+                <span>Items</span>
+                <strong>{{ cart_items|length }}</strong>
+            </div>
+
+            <div class="d-flex justify-content-between mb-3">
+                <span>Total</span>
+                <strong class="text-success">
+                    ₹{{ total }}
+                </strong>
+            </div>
+
+            <hr>
+
+            <a href="{% url 'checkout' %}"
+               class="btn btn-success btn-block btn-lg">
+
+                Proceed to Checkout
+
+            </a>
+
+            <a href="{% url 'home' %}"
+               class="btn btn-outline-secondary btn-block mt-2">
+
+                Continue Shopping
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="text-center mt-5">
+
+            <h4>
+                Your cart is empty.
+            </h4>
+
+            <p class="text-muted">
+                Add some products to your cart.
+            </p>
+
+            <a
+                href="{% url 'home' %}"
+                class="btn btn-primary"
+            >
+                Continue Shopping
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+{% include 'extend-files/footer.html' %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

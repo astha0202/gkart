@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>{{ quote.quote_number }} · Quotation status</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #f1f4f8;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+        }
+
+        .head {
+            padding: 22px 18px 54px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #fff;
+            border-bottom: 4px solid #f59e0b;
+        }
+
+        .head .vendor { color: #cbd5e1; font-size: 13px; }
+        .head h1 { margin: 4px 0 10px; font-size: 20px; }
+
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(245, 158, 11, .18);
+            color: #fbbf24;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .wrap {
+            max-width: 560px;
+            margin: -36px auto 30px;
+            padding: 0 14px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, .07);
+        }
+
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .total {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .muted { color: #64748b; font-size: 13px; }
+
+        .facts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .facts div span { display: block; color: #64748b; font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
+        .facts div strong { font-size: 14px; }
+
+        /* vertical stepper */
+        .steps { list-style: none; margin: 0; padding: 0; }
+
+        .step {
+            position: relative;
+            display: flex;
+            gap: 12px;
+            padding-bottom: 16px;
+        }
+
+        .step:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            left: 13px;
+            top: 28px;
+            bottom: 0;
+            border-left: 2px dashed #cbd2dc;
+        }
+
+        .step.is-done:not(:last-child)::before { border-left: 2px solid #16a34a; }
+
+        .dot {
+            flex: 0 0 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            background: #f1f4f8;
+            border: 2px solid #dfe4ea;
+            color: #8a94a6;
+        }
+
+        .step.is-done .dot { background: #16a34a; border-color: #16a34a; color: #fff; }
+        .step.is-current .dot { background: #2563eb; border-color: #2563eb; color: #fff; box-shadow: 0 0 0 4px rgba(37, 99, 235, .15); }
+        .step.is-stopped .dot { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+        .step .label { font-weight: 700; font-size: 14px; }
+        .step.is-todo .label { color: #8a94a6; }
+        .step .cap { font-size: 12.5px; color: #64748b; }
+        .step.is-current .cap { color: #2563eb; font-weight: 600; }
+        .step.is-stopped .cap { color: #dc2626; font-weight: 600; }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eef1f5;
+        }
+
+        .item:last-child { border-bottom: 0; }
+        .item .name { font-weight: 600; }
+        .item .amt { font-weight: 700; white-space: nowrap; }
+
+        .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+        .row.grand { border-top: 2px solid #eef1f5; margin-top: 6px; padding-top: 10px; font-weight: 800; font-size: 16px; }
+
+        .foot { text-align: center; color: #94a3b8; font-size: 12px; }
+    </style>
+</head>
+
+<body>
+
+<div class="head">
+    <div class="vendor">{{ quote.vendor.business_name }}</div>
+    <h1>Quotation {{ quote.quote_number }}</h1>
+    <span class="status">{{ quote.get_status_display }}</span>
+</div>
+
+<div class="wrap">
+
+    <div class="card">
+        <div class="muted">Grand total (incl. GST)</div>
+        <div class="total">₹{{ quote.total }}</div>
+        {% if quote.is_estimate %}
+            <div class="muted">Estimate from listed prices - awaiting vendor pricing.</div>
+        {% endif %}
+
+        <div class="facts">
+            <div><span>Requested</span><strong>{{ quote.created_at|date:"d M Y" }}</strong></div>
+            <div><span>GST slab</span><strong>{{ quote.tax_rate|floatformat:"-2" }}%</strong></div>
+            {% if purchase_order %}
+                <div><span>Purchase order</span><strong>{{ purchase_order.po_number }}</strong></div>
+            {% endif %}
+            {% if proforma_invoice %}
+                <div><span>Proforma invoice</span><strong>{{ proforma_invoice.pi_number }}</strong></div>
+            {% endif %}
+            {% if purchase_order.tax_invoice_number %}
+                <div><span>Tax invoice</span><strong>{{ purchase_order.tax_invoice_number }}</strong></div>
+            {% endif %}
+            {% if quote.delivery_days is not None %}
+                <div><span>Delivery</span><strong>{{ quote.delivery_days }} days</strong></div>
+            {% endif %}
+            {% if quote.valid_until %}
+                <div><span>Valid until</span><strong>{{ quote.valid_until|date:"d M Y" }}</strong></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Progress</h2>
+
+        <ol class="steps">
+            {% for step in steps %}
+                <li class="step is-{{ step.state }}">
+                    <div class="dot">
+                        {% if step.state == 'done' %}&#10003;{% elif step.state == 'stopped' %}&times;{% else %}{{ step.number }}{% endif %}
+                    </div>
+                    <div>
+                        <div class="label">{{ step.label }}</div>
+                        <div class="cap">
+                            {% if step.state == 'done' and step.at %}{{ step.at|date:"d M Y, H:i" }}
+                            {% elif step.state == 'current' %}In progress
+                            {% else %}{{ step.caption }}{% endif %}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    <div class="card">
+        <h2>Items</h2>
+
+        {% for item in quote.items.all %}
+            <div class="item">
+                <div>
+                    <div class="name">{{ item.product.product_name }}</div>
+                    <div class="muted">{{ item.quantity }} &times; ₹{{ item.effective_price }}</div>
+                    {% if item.supporting_link %}
+                        <a href="{{ item.supporting_link }}" target="_blank" rel="noopener noreferrer"
+                           class="muted">Specs &#8599;</a>
+                    {% endif %}
+                </div>
+                <div class="amt">₹{{ item.line_total }}</div>
+            </div>
+        {% endfor %}
+
+        <div style="margin-top: 10px;">
+            <div class="row"><span class="muted">Subtotal</span><span>₹{{ quote.subtotal }}</span></div>
+            {% if quote.discount %}
+                <div class="row"><span class="muted">Discount</span><span>- ₹{{ quote.discount }}</span></div>
+            {% endif %}
+            <div class="row"><span class="muted">GST</span><span>₹{{ quote.tax }}</span></div>
+            {% if quote.shipping_charges %}
+                <div class="row"><span class="muted">Delivery / freight</span><span>₹{{ quote.shipping_charges }}</span></div>
+            {% endif %}
+            {% if quote.packaging_charges %}
+                <div class="row"><span class="muted">Packaging</span><span>₹{{ quote.packaging_charges }}</span></div>
+            {% endif %}
+            <div class="row grand"><span>Total</span><span>₹{{ quote.total }}</span></div>
+        </div>
+    </div>
+
+    <p class="foot">Verified quotation record · {{ quote.vendor.business_name }}</p>
+
+</div>
+
+</body>
+
+</html>

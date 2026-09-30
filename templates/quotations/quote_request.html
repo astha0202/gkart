@@ -1,0 +1,820 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Request Quotation</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/style.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    >
+
+    <style>
+
+        body {
+            background: #f7f8fa;
+        }
+
+        .quotation-container {
+            max-width: 1050px;
+            margin: 45px auto;
+        }
+
+        .page-title {
+            font-size: 30px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .quotation-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+
+        .section-title {
+            font-size: 21px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .section-hint {
+            color: #888;
+            font-size: 14px;
+            margin-top: -14px;
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            border-radius: 7px;
+            min-height: 45px;
+        }
+
+        .form-control[readonly] {
+            background: #eef1f5;
+            cursor: not-allowed;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th {
+            background: #f5f6f8;
+            padding: 14px;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product-table td {
+            padding: 14px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .product-name {
+            font-weight: 600;
+        }
+
+        .product-image {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            margin-right: 10px;
+        }
+
+        .total-section {
+            max-width: 400px;
+            margin-left: auto;
+            margin-top: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+        }
+
+        .grand-total {
+            border-top: 2px solid #ddd;
+            margin-top: 8px;
+            padding-top: 15px;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .qty-input {
+            width: 90px;
+            min-height: 34px !important;
+        }
+
+        .link-input {
+            min-height: 30px !important;
+            max-width: 320px;
+            font-size: 12.5px;
+        }
+
+        .upload-card {
+            border: 2px dashed #bfd3f7;
+            background: #f8fbff;
+        }
+
+        .validity-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .vendor-pill {
+            display: inline-block;
+            background: #eef4ff;
+            border-radius: 20px;
+            padding: 5px 14px;
+            margin: 0 6px 6px 0;
+            font-size: 14px;
+        }
+
+        .action-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            min-width: 160px;
+            padding: 11px 20px;
+            border-radius: 7px;
+        }
+
+        @media (max-width: 768px) {
+
+            .quotation-container {
+                margin: 25px 15px;
+            }
+
+            .quotation-card {
+                padding: 20px;
+            }
+
+            .product-table {
+                font-size: 13px;
+            }
+
+            .product-table th,
+            .product-table td {
+                padding: 9px;
+            }
+
+            .action-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+{% include 'extend-files/navbar.html' %}
+
+
+<div class="container quotation-container">
+
+
+    <div>
+
+        <div class="page-title">
+            Request Quotation
+        </div>
+
+        <div class="page-subtitle">
+            Review your products and submit a quotation request
+            {% if vendor_count > 1 %}
+                to all {{ vendor_count }} vendors at once - their prices will be
+                compared for you side by side.
+            {% else %}
+                to the vendor.
+            {% endif %}
+        </div>
+
+    </div>
+
+
+    {% if form.non_field_errors %}
+
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+
+
+    {% if editable_lines %}
+
+        {# Separate forms: a <form> cannot be nested inside the main one. #}
+
+        <div class="quotation-card upload-card"
+             id="upload-panel"
+             {% if checkout_items %}hidden{% endif %}>
+
+            <div class="section-title">
+                Upload a product list
+            </div>
+
+            <p class="section-hint">
+                Skip manual entry: upload an Excel (.xlsx) or CSV file with the columns
+                <strong>Product Name</strong>, <strong>Quantity</strong> and
+                <strong>Supporting Link</strong>. Each product is matched to the catalogue
+                and sent to every vendor who sells it, so you can compare their rates.
+            </p>
+
+            <form method="POST"
+                  action="{% url 'quote_upload' %}"
+                  enctype="multipart/form-data"
+                  class="d-flex align-items-center flex-wrap"
+                  style="gap: 12px;">
+
+                {% csrf_token %}
+
+                {{ upload_form.file }}
+
+                <button type="submit" class="btn btn-primary">
+                    Upload &amp; fill the form
+                </button>
+
+                <a href="{% url 'quote_upload_template' %}" class="small">
+                    Download a sample template (.csv)
+                </a>
+
+            </form>
+
+        </div>
+
+        <form method="POST" action="{% url 'quote_upload_clear' %}" id="upload-clear-form" hidden>
+            {% csrf_token %}
+        </form>
+
+    {% endif %}
+
+
+    <form method="POST" novalidate>
+
+        {% csrf_token %}
+
+
+        <div class="quotation-card">
+
+            <div class="section-title">
+                Customer Details
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    {% include 'partials/field.html' with field=form.contact_name %}
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+                    {% if user.is_authenticated %}
+                        {% include 'partials/field.html' with field=form.contact_email badge="Verified" %}
+                        <small class="form-text text-muted">
+                            This is the address on your account, so it cannot be
+                            changed here.
+                        </small>
+                    {% else %}
+                        {% include 'partials/field.html' with field=form.contact_email %}
+                    {% endif %}
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+                    {% include 'partials/field.html' with field=form.contact_phone %}
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+                    {% include 'partials/field.html' with field=form.validity_days %}
+                </div>
+
+
+                {% if form.quantity %}
+
+                    <div class="col-md-6 mb-3">
+                        {% include 'partials/field.html' with field=form.quantity %}
+                    </div>
+
+                {% endif %}
+
+
+                <div class="col-md-6 mb-3">
+                    {% include 'partials/field.html' with field=form.requested_delivery_date %}
+                </div>
+
+
+                <div class="col-md-12 mb-3">
+                    {% include 'partials/field.html' with field=form.billing_address %}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="quotation-card">
+
+            <div class="section-title">
+                Tax Details
+            </div>
+
+            <p class="section-hint">
+                Your GST number is printed on the quotation and the proforma
+                invoice, so enter it if you want input tax credit.
+            </p>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    {% include 'partials/field.html' with field=form.buyer_gst_number %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {% include 'partials/field.html' with field=form.buyer_pan_number %}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="quotation-card">
+
+            <div class="section-title d-flex justify-content-between align-items-center flex-wrap">
+                <span>Products</span>
+
+                {% if editable_lines %}
+                    <span class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                        {% if line_source == 'upload' %}
+                            <span class="badge badge-info">From uploaded file</span>
+                            <button type="submit"
+                                    form="upload-clear-form"
+                                    class="btn btn-sm btn-outline-secondary">
+                                Use my cart instead
+                            </button>
+                        {% endif %}
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                data-toggle-upload>
+                            &#8679; Upload File
+                        </button>
+                    </span>
+                {% endif %}
+            </div>
+
+
+            {% if vendors %}
+
+                <p class="section-hint">
+                    Going to:
+                    {% for vendor in vendors %}
+                        <span class="vendor-pill">{{ vendor.business_name }}</span>
+                    {% endfor %}
+                </p>
+
+            {% endif %}
+
+
+            <div class="table-responsive">
+
+                <table class="product-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Product
+                            </th>
+
+                            <th>
+                                Vendor
+                            </th>
+
+                            <th>
+                                Quantity
+                            </th>
+
+                            <th>
+                                Unit Price
+                            </th>
+
+                            <th>
+                                Total
+                            </th>
+
+                            {% if editable_lines %}
+                                <th></th>
+                            {% endif %}
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        {% if checkout_items %}
+
+                            {% for item in checkout_items %}
+
+                                <tr data-line data-price="{{ item.product.price }}">
+
+                                    <td>
+
+                                        <div class="d-flex align-items-center">
+
+                                            {% if item.product.images %}
+
+                                                <img
+                                                    src="{{ item.product.images.url }}"
+                                                    class="product-image"
+                                                    alt="{{ item.product.product_name }}"
+                                                >
+
+                                            {% endif %}
+
+                                            <div>
+
+                                                <span class="product-name">
+                                                    {{ item.product.product_name }}
+                                                </span>
+
+                                                {% if editable_lines %}
+
+                                                    <input type="hidden" name="line_product" value="{{ item.product.id }}">
+
+                                                    <input type="url"
+                                                           name="line_link"
+                                                           value="{{ item.link }}"
+                                                           class="form-control form-control-sm mt-1 link-input"
+                                                           placeholder="Supporting link (optional)"
+                                                           maxlength="500">
+
+                                                {% elif item.link %}
+
+                                                    <br><a href="{{ item.link }}" target="_blank" rel="noopener noreferrer" class="small">Supporting link &#8599;</a>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ item.product.vendor.business_name|default:"—" }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if editable_lines %}
+                                            <input type="number"
+                                                   name="line_quantity"
+                                                   value="{{ item.quantity }}"
+                                                   min="1"
+                                                   class="form-control form-control-sm qty-input"
+                                                   aria-label="Quantity for {{ item.product.product_name }}"
+                                                   data-line-qty>
+                                        {% else %}
+                                            {{ item.quantity }}
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        ₹{{ item.product.price }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong data-line-total>
+                                            ₹{{ item.subtotal }}
+                                        </strong>
+
+                                    </td>
+
+                                    {% if editable_lines %}
+                                        <td>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link text-danger p-0"
+                                                    data-remove-line
+                                                    title="Remove from this request">
+                                                Remove
+                                            </button>
+                                        </td>
+                                    {% endif %}
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        {% else %}
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="text-center text-muted py-4"
+                                >
+
+                                    No products yet. Add something to your cart, or
+                                    upload an Excel / CSV product list above.
+
+                                </td>
+
+                            </tr>
+
+                        {% endif %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="total-section">
+
+                <div class="total-row">
+
+                    <span>
+                        Subtotal (at listed prices)
+                    </span>
+
+                    <strong data-subtotal>
+                        ₹{{ total|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+
+                <div class="total-row">
+
+                    <span>
+                        Tax
+                    </span>
+
+                    <span>
+                        Confirmed by the vendor
+                    </span>
+
+                </div>
+
+
+                <div class="total-row grand-total">
+
+                    <span>
+                        Estimated Total
+                    </span>
+
+                    <span data-grand>
+                        ₹{{ total|floatformat:2 }}
+                    </span>
+
+                </div>
+
+                <p class="text-muted small mb-0">
+                    This is an estimate from the listed prices. Each vendor
+                    confirms the final price, tax and shipping in their response.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="quotation-card">
+
+            <div class="section-title">
+                Additional Requirements
+            </div>
+
+            {% include 'partials/field.html' with field=form.buyer_notes %}
+
+
+            <div class="validity-box">
+
+                <strong>
+                    Quotation Validity
+                </strong>
+
+                <p class="text-muted mb-0 mt-1">
+
+                    This quotation request will be valid
+                    according to the selected validity period.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if unassigned %}
+
+            <div class="alert alert-warning">
+                {{ unassigned|length }} product(s) in this list have no vendor
+                assigned and will be left out of the request.
+            </div>
+
+        {% endif %}
+
+
+        <div class="quotation-card">
+
+            <div class="action-section">
+
+                {% if single_product %}
+
+                    <a
+                        href="{% url 'product_detail' single_product.slug %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        ← Back to product
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'checkout' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        ← Back to Checkout
+                    </a>
+
+                {% endif %}
+
+
+                <div class="action-buttons">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        {% if not checkout_items %}disabled{% endif %}
+                    >
+                        {% if vendor_count > 1 %}
+                            Request Quotation from {{ vendor_count }} Vendors
+                        {% else %}
+                            Request Quotation
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+</div>
+
+
+{% include 'extend-files/footer.html' %}
+
+
+<script>
+    (function () {
+        // "Upload File" toggles the upload panel next to the manual list.
+        var toggle = document.querySelector("[data-toggle-upload]");
+        var panel = document.getElementById("upload-panel");
+
+        if (toggle && panel) {
+            toggle.addEventListener("click", function () {
+                panel.hidden = !panel.hidden;
+
+                if (!panel.hidden) {
+                    panel.scrollIntoView({behavior: "smooth", block: "center"});
+                }
+            });
+        }
+
+        // Keep the estimate in step with quantity edits and removed rows.
+        function money(value) {
+            return "₹" + value.toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function recalc() {
+            var total = 0;
+
+            document.querySelectorAll("[data-line]").forEach(function (row) {
+                var qtyInput = row.querySelector("[data-line-qty]");
+
+                if (!qtyInput) {
+                    return;
+                }
+
+                var qty = Math.max(parseInt(qtyInput.value, 10) || 0, 0);
+                var line = qty * parseFloat(row.getAttribute("data-price"));
+
+                row.querySelector("[data-line-total]").textContent = money(line);
+                total += line;
+            });
+
+            document.querySelectorAll("[data-subtotal], [data-grand]").forEach(function (el) {
+                el.textContent = money(total);
+            });
+        }
+
+        document.querySelectorAll("[data-line-qty]").forEach(function (input) {
+            input.addEventListener("input", recalc);
+        });
+
+        document.querySelectorAll("[data-remove-line]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                if (document.querySelectorAll("[data-line]").length <= 1) {
+                    alert("A quotation request needs at least one product.");
+                    return;
+                }
+
+                button.closest("[data-line]").remove();
+                recalc();
+            });
+        });
+    })();
+</script>
+
+
+</body>
+
+</html>

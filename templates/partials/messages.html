@@ -1,0 +1,58 @@
+{% comment %}
+Global feedback strip. Included once from the navbar, so every page that has
+a navbar reports its errors, warnings and confirmations - and offers the
+pending email-activation link inline instead of only by email.
+{% endcomment %}
+
+<div class="container site-messages mt-3">
+
+    {% if pending_activation %}
+
+        <div class="alert alert-warning" role="alert">
+
+            <strong>Verify your email address</strong>
+
+            <p class="mb-2">
+                We sent an activation link to
+                <strong>{{ pending_activation.email }}</strong>.
+                You can also activate straight from here:
+            </p>
+
+            <a href="{{ pending_activation.link }}"
+               class="btn btn-sm btn-warning mb-2">
+                Activate my account now
+            </a>
+
+            <div class="small text-break">
+                <a href="{{ pending_activation.link }}">
+                    {{ pending_activation.link }}
+                </a>
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show"
+                 role="alert">
+
+                {{ message }}
+
+                <button type="button"
+                        class="close"
+                        data-dismiss="alert"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+</div>

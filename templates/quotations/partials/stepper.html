@@ -1,0 +1,154 @@
+{% comment %}
+Quotation lifecycle stepper. Pass `steps` (Quote.lifecycle_steps()).
+Scoped `qs-` styles so it renders the same on every page that includes it.
+{% endcomment %}
+
+<style>
+    .qs-wrap {
+        background: #fff;
+        border: 1px solid #e6e8ec;
+        border-radius: 12px;
+        padding: 18px 14px 14px;
+        overflow-x: auto;
+    }
+
+    .qs {
+        display: flex;
+        align-items: flex-start;
+        min-width: 820px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .qs__step {
+        flex: 1 1 0;
+        position: relative;
+        text-align: center;
+        padding: 0 4px;
+    }
+
+    /* connector to the next step */
+    .qs__step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 16px;
+        left: calc(50% + 21px);
+        right: calc(-50% + 21px);
+        border-top: 2px dashed #cbd2dc;
+    }
+
+    .qs__step.is-done:not(:last-child)::after {
+        border-top: 2px solid #16a34a;
+    }
+
+    .qs__dot {
+        width: 34px;
+        height: 34px;
+        margin: 0 auto 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        background: #f1f4f8;
+        color: #8a94a6;
+        border: 2px solid #dfe4ea;
+    }
+
+    .qs__step.is-done .qs__dot {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: #fff;
+    }
+
+    .qs__step.is-current .qs__dot {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+        box-shadow: 0 0 0 5px rgba(37, 99, 235, .15);
+    }
+
+    .qs__step.is-stopped .qs__dot {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #fff;
+    }
+
+    .qs__label {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.25;
+    }
+
+    .qs__step.is-todo .qs__label {
+        color: #8a94a6;
+    }
+
+    .qs__caption {
+        margin-top: 2px;
+        font-size: 11px;
+        color: #8a94a6;
+        line-height: 1.3;
+    }
+
+    .qs__step.is-current .qs__caption {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .qs__step.is-stopped .qs__caption {
+        color: #dc2626;
+        font-weight: 600;
+    }
+</style>
+
+<div class="qs-wrap" aria-label="Quotation progress">
+
+    <ol class="qs">
+
+        {% for step in steps %}
+
+            <li class="qs__step is-{{ step.state }}"
+                {% if step.state == 'current' %}aria-current="step"{% endif %}>
+
+                <div class="qs__dot">
+                    {% if step.state == 'done' %}
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="3.2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    {% elif step.state == 'stopped' %}
+                        &times;
+                    {% else %}
+                        {{ step.number }}
+                    {% endif %}
+                </div>
+
+                <div class="qs__label">{{ step.number }}. {{ step.label }}</div>
+
+                <div class="qs__caption">
+                    {% if step.state == 'done' and step.at %}
+                        {{ step.at|date:"d M Y" }}
+                    {% elif step.state == 'current' %}
+                        {% if step.key == 'submitted' %}Awaiting vendor quote
+                        {% elif step.key == 'selected' %}Awaiting customer approval
+                        {% elif step.key == 'payment' %}Payment pending
+                        {% elif step.key == 'ack' %}Awaiting acknowledgement
+                        {% elif step.key == 'tax_invoice' %}Invoice pending
+                        {% else %}{{ step.caption }}{% endif %}
+                    {% else %}
+                        {{ step.caption }}
+                    {% endif %}
+                </div>
+
+            </li>
+
+        {% endfor %}
+
+    </ol>
+
+</div>

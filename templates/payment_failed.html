@@ -1,0 +1,91 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Payment Failed</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'style.css' %}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    >
+
+    <style>
+
+        body {
+            background: #f7f8fa;
+        }
+
+        .result-container {
+            max-width: 650px;
+            margin: 70px auto;
+            text-align: center;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 45px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .result-detail {
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+{% include 'extend-files/navbar.html' %}
+
+<div class="container result-container">
+
+    <div class="result-card">
+
+        <div class="result-icon">❌</div>
+
+        <div class="result-title">Payment Failed</div>
+
+        <p class="result-detail">Order Number: <strong>{{ order.order_number }}</strong></p>
+        <p class="result-detail">Your payment could not be verified. No amount was deducted, or it will be auto-refunded.</p>
+
+        <a href="{% url 'payment' %}" class="btn btn-success mt-4">Try Again</a>
+
+    </div>
+
+</div>
+
+{% include 'extend-files/footer.html' %}
+
+</body>
+
+</html>

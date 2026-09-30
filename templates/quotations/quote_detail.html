@@ -1,0 +1,501 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quotation {{ quote.quote_number }}</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="{% static 'css/style.css' %}">
+
+    <style>
+        body {
+            background: #f7f8fa;
+        }
+
+        .qr-card svg {
+            width: 150px;
+            height: 150px;
+            display: block;
+            margin: 0 auto 8px;
+        }
+
+        .next-step {
+            border-left: 4px solid #2563eb;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: .45rem;
+        }
+
+        .summary-row.grand {
+            border-top: 2px solid #e5e7eb;
+            padding-top: .6rem;
+            margin-top: .6rem;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include "extend-files/navbar.html" %}
+
+    <div class="container mt-5 mb-5">
+
+
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+            <div>
+                <h3 class="mb-1">Quotation {{ quote.quote_number }}</h3>
+                <span class="badge badge-secondary text-uppercase">{{ quote.get_status_display }}</span>
+
+                {% if quote.is_estimate %}
+                    <span class="badge badge-warning text-uppercase">Estimate</span>
+                {% endif %}
+
+                {% if is_buyer and sibling_count > 1 %}
+                    <div class="mt-2">
+                        <a href="{% url 'quote_compare' quote.request_group %}">
+                            Compare all {{ sibling_count }} vendor responses to this request &rarr;
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+
+                {% if is_buyer and quote.status == 'quoted' %}
+
+                    <form method="POST" action="{% url 'quote_accept' quote.quote_number %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Accept</button>
+                    </form>
+
+                    <form method="POST" action="{% url 'quote_reject' quote.quote_number %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+
+                {% endif %}
+
+                {% if quote.status == 'pending' or quote.status == 'quoted' %}
+
+                    <form method="POST" action="{% url 'quote_cancel' quote.quote_number %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary">Cancel</button>
+                    </form>
+
+                {% endif %}
+
+                {% if is_vendor and quote.status == 'pending' %}
+
+                    <a href="{% url 'quote_send' quote.quote_number %}" class="btn btn-primary">
+                        Price & Send
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <div class="mb-4">
+            {% include "quotations/partials/stepper.html" with steps=steps %}
+        </div>
+
+
+        {# ---------- what happens next (lifecycle steps 6-8) ---------- #}
+
+        {% if proforma_invoice %}
+
+            {% if is_buyer and not purchase_order.payment_marked_at %}
+
+                <div class="card mb-4 next-step">
+                    <div class="card-body">
+                        <h6 class="mb-1">Next step: pay against Proforma Invoice {{ proforma_invoice.pi_number }}</h6>
+                        <p class="text-muted small mb-3">
+                            Pay ₹{{ quote.total }} to the vendor's account shown on the invoice, then record the
+                            payment reference here so they can confirm it.
+                        </p>
+
+                        <form method="POST" action="{% url 'quote_mark_paid' quote.quote_number %}"
+                              class="form-inline">
+                            {% csrf_token %}
+                            <input type="text" name="payment_reference" class="form-control mr-2 mb-2"
+                                   placeholder="UTR / transaction ID" maxlength="100" required>
+                            <button type="submit" class="btn btn-primary mb-2">I have paid</button>
+                        </form>
+                    </div>
+                </div>
+
+            {% elif is_vendor and purchase_order.payment_marked_at and not purchase_order.payment_acknowledged_at %}
+
+                <div class="card mb-4 next-step">
+                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="mb-2">
+                            <h6 class="mb-1">Next step: confirm the buyer's payment</h6>
+                            <p class="text-muted small mb-0">
+                                Reference <strong>{{ purchase_order.payment_reference }}</strong>,
+                                recorded {{ purchase_order.payment_marked_at|date:"d M Y H:i" }} for ₹{{ quote.total }}.
+                            </p>
+                        </div>
+                        <form method="POST" action="{% url 'quote_ack_payment' quote.quote_number %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Acknowledge payment</button>
+                        </form>
+                    </div>
+                </div>
+
+            {% elif is_vendor and purchase_order.payment_acknowledged_at and not purchase_order.tax_invoice_number %}
+
+                <div class="card mb-4 next-step">
+                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="mb-2">
+                            <h6 class="mb-1">Next step: issue the tax invoice</h6>
+                            <p class="text-muted small mb-0">
+                                Payment acknowledged. Issuing the tax invoice completes the order.
+                            </p>
+                        </div>
+                        <form method="POST" action="{% url 'quote_issue_tax_invoice' quote.quote_number %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Issue tax invoice</button>
+                        </form>
+                    </div>
+                </div>
+
+            {% elif purchase_order.payment_marked_at and not purchase_order.tax_invoice_number %}
+
+                <div class="alert alert-info">
+                    {% if not purchase_order.payment_acknowledged_at %}
+                        Payment recorded (ref {{ purchase_order.payment_reference }}). Waiting for the vendor to acknowledge it.
+                    {% else %}
+                        Payment acknowledged. Waiting for the vendor to issue the tax invoice.
+                    {% endif %}
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+
+        <div class="row">
+
+            <div class="col-md-8">
+
+                <div class="card mb-4">
+
+                    <div class="card-header">Items</div>
+
+                    <div class="card-body table-responsive">
+
+                        <table class="table table-bordered mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Listed Price</th>
+                                    <th>Quoted Price</th>
+                                    <th>Line Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for item in quote.items.all %}
+
+                                    <tr>
+                                        <td>
+                                            {{ item.product.product_name }}
+                                            {% if item.supporting_link %}
+                                                <br>
+                                                <a href="{{ item.supporting_link }}" target="_blank"
+                                                   rel="noopener noreferrer" class="small">Supporting link &#8599;</a>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹{{ item.listed_price }}</td>
+                                        <td>
+                                            {% if item.quoted_price is not None %}
+                                                ₹{{ item.quoted_price }}
+                                            {% else %}
+                                                <span class="text-muted">Not priced yet</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>₹{{ item.line_total }}</td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <div class="card mb-4">
+
+                    <div class="card-header">History</div>
+
+                    <ul class="list-group list-group-flush">
+
+                        {% for entry in quote.history.all %}
+
+                            <li class="list-group-item">
+                                {% if entry.from_status == entry.to_status %}
+                                    <strong>{{ entry.comment }}</strong>
+                                {% else %}
+                                    <strong>{{ entry.from_status|default:"-" }} &rarr; {{ entry.to_status }}</strong>
+                                {% endif %}
+                                by {{ entry.changed_by.full_name|default:entry.changed_by.username }}
+                                on {{ entry.changed_at|date:"d M Y H:i" }}
+                                {% if entry.comment and entry.from_status != entry.to_status %}
+                                    <br><small class="text-muted">{{ entry.comment }}</small>
+                                {% endif %}
+                            </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                {% if qr_code %}
+
+                    <div class="card mb-4 qr-card text-center">
+
+                        <div class="card-header">Quotation QR</div>
+
+                        <div class="card-body">
+                            {{ qr_code|safe }}
+                            <p class="small text-muted mb-1">
+                                Scan to open the live status of this quotation on a phone.
+                            </p>
+                            <a href="{{ mobile_url }}" target="_blank" class="small">Open mobile view &#8599;</a>
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+                <div class="card mb-4">
+
+                    <div class="card-header">Summary</div>
+
+                    <div class="card-body">
+
+                        <p><strong>Buyer:</strong> {{ quote.buyer.full_name|default:quote.buyer.username }}</p>
+                        <p><strong>Vendor:</strong> {{ quote.vendor.business_name }}</p>
+                        <p><strong>Requested delivery:</strong> {{ quote.requested_delivery_date|default:"-" }}</p>
+                        <p><strong>Valid until:</strong> {{ quote.valid_until|default:"-" }}</p>
+                        <p><strong>Validity requested:</strong> {{ quote.validity_days }} days</p>
+
+                        {% if quote.delivery_days is not None %}
+                            <p><strong>Delivery lead time:</strong> {{ quote.delivery_days }} days</p>
+                        {% endif %}
+
+                        {% if quote.payment_terms %}
+                            <p><strong>Payment terms:</strong> {{ quote.payment_terms }}</p>
+                        {% endif %}
+
+                        {% if quote.warranty_terms %}
+                            <p><strong>Warranty:</strong> {{ quote.warranty_terms }}</p>
+                        {% endif %}
+
+                        {% if quote.buyer_notes %}
+                            <p><strong>Buyer notes:</strong><br>{{ quote.buyer_notes }}</p>
+                        {% endif %}
+
+                        {% if quote.vendor_notes %}
+                            <p><strong>Vendor notes:</strong><br>{{ quote.vendor_notes }}</p>
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="summary-row">
+                            <span>Subtotal</span><strong>₹{{ quote.subtotal }}</strong>
+                        </div>
+                        {% if quote.discount %}
+                            <div class="summary-row">
+                                <span>Discount</span><strong>- ₹{{ quote.discount }}</strong>
+                            </div>
+                        {% endif %}
+                        <div class="summary-row">
+                            <span>GST @ {{ quote.tax_rate|floatformat:"-2" }}%</span><strong>₹{{ quote.tax }}</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery / freight</span><strong>₹{{ quote.shipping_charges }}</strong>
+                        </div>
+                        {% if quote.packaging_charges %}
+                            <div class="summary-row">
+                                <span>Packaging &amp; handling</span><strong>₹{{ quote.packaging_charges }}</strong>
+                            </div>
+                        {% endif %}
+                        <div class="summary-row grand">
+                            <span>Total</span><strong>₹{{ quote.total }}</strong>
+                        </div>
+
+                        {% if quote.is_estimate %}
+                            <p class="text-muted small mb-0">
+                                This is an estimate from the listed prices at the
+                                products' GST slab. The vendor confirms the final
+                                figures when they send the quotation.
+                            </p>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="card mb-4">
+
+                    <div class="card-header">Customer Details</div>
+
+                    <div class="card-body">
+
+                        <p class="mb-1">
+                            <strong>Contact:</strong>
+                            {{ quote.contact_name|default:quote.buyer.full_name }}
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Email:</strong>
+                            {{ quote.contact_email|default:quote.buyer.email }}
+                            {% if quote.buyer.is_verified %}
+                                <span class="badge badge-success">Verified</span>
+                            {% endif %}
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Phone:</strong>
+                            {{ quote.contact_phone|default:quote.buyer.phone }}
+                        </p>
+
+                        {% if quote.billing_address %}
+                            <p class="mb-1">
+                                <strong>Billing address:</strong><br>
+                                {{ quote.billing_address|linebreaksbr }}
+                            </p>
+                        {% endif %}
+
+                        <p class="mb-1">
+                            <strong>GST:</strong> {{ quote.buyer_gst_number|default:"-" }}
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>PAN:</strong> {{ quote.buyer_pan_number|default:"-" }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if quote.vendor_bank_account_number or quote.vendor_gst_number %}
+
+                    <div class="card mb-4">
+
+                        <div class="card-header">Payment Details (Vendor)</div>
+
+                        <div class="card-body">
+
+                            <p class="mb-1">
+                                <strong>GST:</strong>
+                                {{ quote.vendor_gst_number|default:"-" }}
+                            </p>
+
+                            {% if quote.vendor_bank_account_number %}
+                                <p class="mb-0 small">
+                                    {{ quote.vendor_bank_account_name }}<br>
+                                    A/C {{ quote.vendor_bank_account_number }}<br>
+                                    IFSC {{ quote.vendor_bank_ifsc }}<br>
+                                    {{ quote.vendor_bank_name }}
+                                </p>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+                {% if purchase_order %}
+
+                    <div class="card mb-4">
+
+                        <div class="card-header">Purchase Order &amp; Invoices</div>
+
+                        <div class="card-body">
+                            <p><strong>PO Number:</strong> {{ purchase_order.po_number }}</p>
+                            <p><strong>Status:</strong> {{ purchase_order.get_status_display }}</p>
+
+                            {% if proforma_invoice %}
+                                <p class="mb-2"><strong>Proforma Invoice:</strong> {{ proforma_invoice.pi_number }}</p>
+
+                                <a href="{% url 'invoice_view' quote.quote_number 'proforma' %}"
+                                   class="btn btn-sm btn-primary mb-1">
+                                    View PI
+                                </a>
+
+                                <a href="{% url 'pi_download' proforma_invoice.pi_number %}"
+                                   class="btn btn-sm btn-outline-primary mb-1">
+                                    Download PI (PDF)
+                                </a>
+                            {% endif %}
+
+                            {% if purchase_order.payment_marked_at %}
+                                <p class="mt-3 mb-1">
+                                    <strong>Payment ref:</strong> {{ purchase_order.payment_reference }}
+                                </p>
+                            {% endif %}
+
+                            {% if purchase_order.tax_invoice_number %}
+                                <p class="mt-3 mb-2"><strong>Tax Invoice:</strong> {{ purchase_order.tax_invoice_number }}</p>
+
+                                <a href="{% url 'invoice_view' quote.quote_number 'tax' %}"
+                                   class="btn btn-sm btn-primary mb-1">
+                                    View Tax Invoice
+                                </a>
+
+                                <a href="{% url 'tax_invoice_download' quote.quote_number %}"
+                                   class="btn btn-sm btn-outline-primary mb-1">
+                                    Download (PDF)
+                                </a>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% include "extend-files/footer.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+{% include 'extend-files/navbar.html' %}
+
+<div class="container mt-4 mb-5">
+
+    <h2 class="mb-1">Welcome, {{ account.full_name|default:account.username }}</h2>
+    <p class="text-muted mb-4">Here is everything happening on your account.</p>
+
+
+    <div class="row">
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <a href="{% url 'orders' %}" class="dashboard-stat-card">
+                <div class="stat-icon">&#128230;</div>
+                <div class="stat-number">{{ order_count }}</div>
+                <div class="stat-label">Orders</div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <a href="{% url 'quote_list_buyer' %}" class="dashboard-stat-card">
+                <div class="stat-icon">&#128203;</div>
+                <div class="stat-number">{{ quote_count }}</div>
+                <div class="stat-label">Quotations</div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <a href="{% url 'quote_list_buyer' %}" class="dashboard-stat-card">
+                <div class="stat-icon">&#128196;</div>
+                <div class="stat-number">{{ po_count }}</div>
+                <div class="stat-label">Purchase Orders</div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <a href="{% url 'quote_list_buyer' %}" class="dashboard-stat-card">
+                <div class="stat-icon">&#129534;</div>
+                <div class="stat-number">{{ pi_count }}</div>
+                <div class="stat-label">Proforma Invoices</div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <a href="{% url 'my_reviews' %}" class="dashboard-stat-card">
+                <div class="stat-icon">&#11088;</div>
+                <div class="stat-number">{{ review_count }}</div>
+                <div class="stat-label">Reviews</div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <a href="{% url 'details' %}" class="dashboard-stat-card">
+                <div class="stat-icon">&#128100;</div>
+                <div class="stat-number">&rarr;</div>
+                <div class="stat-label">My Profile</div>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="row mt-2">
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Wishlist</h5>
+                <a href="{% url 'wishlist' %}" class="btn btn-sm btn-outline-primary mt-2">View Wishlist</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Notifications</h5>
+                <p class="mb-2">{{ unread_notifications }} unread</p>
+                <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-primary">View Notifications</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Addresses</h5>
+                <a href="{% url 'address' %}" class="btn btn-sm btn-outline-primary mt-2">Manage Addresses</a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% include 'extend-files/footer.html' %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+<script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

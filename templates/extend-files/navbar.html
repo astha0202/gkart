@@ -1,0 +1,1080 @@
+{% comment %}
+Single-row application navbar. Self-contained: its own scoped `gk-` styles and
+plain JS, so it renders and behaves identically on every page regardless of
+which Bootstrap build that page happens to load.
+{% endcomment %}
+
+<style>
+
+    .gk-nav {
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+        background: #ffffff;
+        border-bottom: 1px solid #e6e8ec;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                     "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .gk-nav * {
+        box-sizing: border-box;
+    }
+
+    .gk-nav__inner {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 0 22px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+
+    /* ---------- brand ---------- */
+
+    .gk-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+        text-decoration: none;
+    }
+
+    .gk-brand:hover {
+        text-decoration: none;
+    }
+
+    .gk-brand__mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gk-brand__name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #101828;
+        letter-spacing: -.2px;
+    }
+
+    .gk-brand__tag {
+        margin-left: 2px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eff4ff;
+        color: #1d4ed8;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        text-transform: uppercase;
+    }
+
+
+    /* ---------- primary links ---------- */
+
+    .gk-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .gk-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: #475467;
+        font-size: 14.5px;
+        font-weight: 500;
+        white-space: nowrap;
+        text-decoration: none;
+        background: none;
+        border: 0;
+        cursor: pointer;
+    }
+
+    .gk-link:hover {
+        background: #f2f4f7;
+        color: #101828;
+        text-decoration: none;
+    }
+
+    .gk-link.is-active {
+        background: #eff4ff;
+        color: #1d4ed8;
+        font-weight: 600;
+    }
+
+    .gk-link__caret {
+        transition: transform .15s ease;
+    }
+
+    .gk-link[aria-expanded="true"] .gk-link__caret {
+        transform: rotate(180deg);
+    }
+
+
+    /* ---------- search ---------- */
+
+    .gk-search {
+        position: relative;
+        flex: 1 1 auto;
+        max-width: 380px;
+        margin-left: auto;
+    }
+
+    .gk-search input {
+        width: 100%;
+        height: 40px;
+        padding: 0 14px 0 40px;
+        border: 1px solid #d0d5dd;
+        border-radius: 999px;
+        background: #f9fafb;
+        font-size: 14px;
+        color: #101828;
+        outline: none;
+    }
+
+    .gk-search input::placeholder {
+        color: #98a2b3;
+    }
+
+    .gk-search input:focus {
+        background: #fff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
+    .gk-search__icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #98a2b3;
+        pointer-events: none;
+    }
+
+
+    /* ---------- right-hand actions ---------- */
+
+    .gk-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .gk-icon-btn {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #475467;
+        text-decoration: none;
+    }
+
+    .gk-icon-btn:hover {
+        background: #f2f4f7;
+        color: #101828;
+        text-decoration: none;
+    }
+
+    .gk-badge {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        border-radius: 999px;
+        background: #d92d20;
+        border: 2px solid #fff;
+        color: #fff;
+        font-size: 10.5px;
+        font-weight: 700;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gk-badge--muted {
+        background: #475467;
+    }
+
+    button.gk-icon-btn {
+        border: 0;
+        background: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+
+    /* ---------- unread quotation updates badge (flashes) ---------- */
+
+    .gk-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 19px;
+        height: 19px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: #d92d20;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        animation: gk-flash 1.4s ease-in-out infinite;
+    }
+
+    @keyframes gk-flash {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(217, 45, 32, .55); opacity: 1; }
+        50% { box-shadow: 0 0 0 6px rgba(217, 45, 32, 0); opacity: .55; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .gk-count { animation: none; }
+    }
+
+
+    /* ---------- notification bell dropdown ---------- */
+
+    .gk-bell {
+        margin-left: 0;
+    }
+
+    .gk-bell__menu {
+        width: 340px;
+        max-width: calc(100vw - 24px);
+    }
+
+    .gk-bell__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px 10px;
+        border-bottom: 1px solid #f2f4f7;
+        margin-bottom: 4px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #101828;
+    }
+
+    .gk-bell__head a {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #1d4ed8;
+    }
+
+    .gk-bell__item {
+        display: block;
+        position: relative;
+        padding: 9px 12px 9px 24px;
+        border-radius: 8px;
+        color: #475467;
+        font-size: 13.5px;
+        text-decoration: none;
+    }
+
+    .gk-bell__item:hover {
+        background: #f9fafb;
+        color: #101828;
+        text-decoration: none;
+    }
+
+    .gk-bell__item.is-unread {
+        color: #101828;
+        font-weight: 600;
+    }
+
+    .gk-bell__item.is-unread::before {
+        content: "";
+        position: absolute;
+        left: 10px;
+        top: 15px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #2563eb;
+    }
+
+    .gk-bell__msg {
+        display: block;
+        line-height: 1.35;
+    }
+
+    .gk-bell__time {
+        display: block;
+        margin-top: 2px;
+        font-size: 11.5px;
+        font-weight: 400;
+        color: #98a2b3;
+    }
+
+    .gk-bell__empty {
+        padding: 18px 12px;
+        text-align: center;
+        font-size: 13.5px;
+        color: #98a2b3;
+    }
+
+
+    /* ---------- account ---------- */
+
+    .gk-account {
+        position: relative;
+        margin-left: 4px;
+    }
+
+    .gk-account__btn {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 4px 10px 4px 4px;
+        border: 1px solid #e4e7ec;
+        border-radius: 999px;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .gk-account__btn:hover {
+        background: #f9fafb;
+        border-color: #d0d5dd;
+    }
+
+    .gk-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #1d4ed8;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        flex-shrink: 0;
+    }
+
+    .gk-account__name {
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #344054;
+    }
+
+
+    /* ---------- dropdown menus ---------- */
+
+    .gk-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        min-width: 268px;
+        padding: 6px;
+        background: #fff;
+        border: 1px solid #e4e7ec;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(16, 24, 40, .12);
+        display: none;
+    }
+
+    .gk-menu--left {
+        right: auto;
+        left: 0;
+        min-width: 232px;
+    }
+
+    .gk-menu.is-open {
+        display: block;
+    }
+
+    .gk-menu__head {
+        padding: 10px 12px 12px;
+        border-bottom: 1px solid #f2f4f7;
+        margin-bottom: 6px;
+    }
+
+    .gk-menu__name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #101828;
+    }
+
+    .gk-menu__mail {
+        margin-top: 2px;
+        font-size: 12.5px;
+        color: #667085;
+        word-break: break-all;
+    }
+
+    .gk-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 7px;
+        padding: 2px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .2px;
+    }
+
+    .gk-chip--ok {
+        background: #ecfdf3;
+        color: #027a48;
+    }
+
+    .gk-chip--warn {
+        background: #fffaeb;
+        color: #b54708;
+    }
+
+    .gk-menu__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 8px;
+        color: #344054;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .gk-menu__item:hover {
+        background: #f9fafb;
+        color: #101828;
+        text-decoration: none;
+    }
+
+    .gk-menu__count {
+        font-size: 12px;
+        font-weight: 600;
+        color: #667085;
+    }
+
+    .gk-menu__sep {
+        height: 1px;
+        margin: 6px 4px;
+        background: #f2f4f7;
+    }
+
+
+    /* ---------- signed-out buttons ---------- */
+
+    .gk-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .gk-btn--ghost {
+        color: #344054;
+        border: 1px solid #d0d5dd;
+        background: #fff;
+    }
+
+    .gk-btn--ghost:hover {
+        background: #f9fafb;
+        color: #101828;
+        text-decoration: none;
+    }
+
+    .gk-btn--primary {
+        background: #1d4ed8;
+        border: 1px solid #1d4ed8;
+        color: #fff;
+    }
+
+    .gk-btn--primary:hover {
+        background: #1743b8;
+        color: #fff;
+        text-decoration: none;
+    }
+
+
+    /* ---------- mobile ---------- */
+
+    .gk-burger {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #e4e7ec;
+        border-radius: 10px;
+        background: #fff;
+        align-items: center;
+        justify-content: center;
+        color: #344054;
+        cursor: pointer;
+    }
+
+    .gk-mobile {
+        display: none;
+        padding: 10px 22px 18px;
+        border-top: 1px solid #f2f4f7;
+        background: #fff;
+    }
+
+    .gk-mobile.is-open {
+        display: block;
+    }
+
+    .gk-mobile .gk-link,
+    .gk-mobile .gk-btn {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+        margin-bottom: 4px;
+    }
+
+    .gk-mobile .gk-search {
+        max-width: none;
+        margin: 0 0 12px;
+    }
+
+    .gk-mobile__label {
+        margin: 12px 0 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: #98a2b3;
+    }
+
+    @media (max-width: 1100px) {
+
+        .gk-account__name {
+            display: none;
+        }
+
+        .gk-search {
+            max-width: 260px;
+        }
+
+    }
+
+    @media (max-width: 900px) {
+
+        .gk-nav__inner > .gk-links,
+        .gk-nav__inner > .gk-search {
+            display: none;
+        }
+
+        .gk-burger {
+            display: inline-flex;
+        }
+
+        .gk-actions {
+            margin-left: auto;
+        }
+
+    }
+
+</style>
+
+
+<nav class="gk-nav">
+
+    <div class="gk-nav__inner">
+
+        <a class="gk-brand" href="{% url 'home' %}">
+
+            <span class="gk-brand__mark">G</span>
+
+            <span class="gk-brand__name">Greatkart</span>
+
+            {% if is_vendor_account %}
+                <span class="gk-brand__tag">Vendor</span>
+            {% endif %}
+
+        </a>
+
+
+        {% if is_vendor_account %}
+
+            {# ---------- vendor workspace ---------- #}
+
+            <div class="gk-links">
+
+                <a class="gk-link {% if request.resolver_match.url_name == 'vendor_dashboard' %}is-active{% endif %}"
+                   href="{% url 'vendor_dashboard' %}">
+                    Dashboard
+                </a>
+
+                <a class="gk-link {% if 'product' in request.resolver_match.url_name %}is-active{% endif %}"
+                   href="{% url 'vendor_products' %}">
+                    Products
+                </a>
+
+                <a class="gk-link {% if 'quote' in request.resolver_match.url_name %}is-active{% endif %}"
+                   href="{% url 'quote_list_vendor' %}">
+                    Quotation Requests
+                    {% include 'extend-files/quote_badge.html' %}
+                </a>
+
+                <a class="gk-link {% if request.resolver_match.url_name == 'vendor_add_product' %}is-active{% endif %}"
+                   href="{% url 'vendor_add_product' %}">
+                    Add Product
+                </a>
+
+            </div>
+
+        {% else %}
+
+            {# ---------- storefront ---------- #}
+
+            <div class="gk-links">
+
+                <a class="gk-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}"
+                   href="{% url 'home' %}">
+                    Home
+                </a>
+
+                <a class="gk-link {% if request.resolver_match.url_name == 'products' %}is-active{% endif %}"
+                   href="{% url 'products' %}">
+                    Products
+                </a>
+
+                <div class="gk-account" data-gk-dropdown>
+
+                    <button type="button"
+                            class="gk-link {% if request.resolver_match.url_name == 'categories' %}is-active{% endif %}"
+                            data-gk-toggle
+                            aria-expanded="false">
+
+                        Categories
+
+                        <svg class="gk-link__caret" width="12" height="12" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+
+                    </button>
+
+                    <div class="gk-menu gk-menu--left" data-gk-panel>
+
+                        {% for category in nav_categories %}
+
+                            <a class="gk-menu__item"
+                               href="{% url 'home' %}?category={{ category.id }}">
+                                {{ category.category_name }}
+                            </a>
+
+                        {% empty %}
+
+                            <a class="gk-menu__item" href="{% url 'categories' %}">
+                                Browse categories
+                            </a>
+
+                        {% endfor %}
+
+                        <div class="gk-menu__sep"></div>
+
+                        <a class="gk-menu__item" href="{% url 'categories' %}">
+                            <strong>All categories</strong>
+                        </a>
+
+                    </div>
+
+                </div>
+
+                {% if user.is_authenticated %}
+
+                    <a class="gk-link {% if 'quote' in request.resolver_match.url_name %}is-active{% endif %}"
+                       href="{% url 'quote_list_buyer' %}">
+                        Quotations
+                        {% include 'extend-files/quote_badge.html' %}
+                    </a>
+
+                {% else %}
+
+                    <a class="gk-link" href="{% url 'vendor_register' %}">
+                        Sell on Greatkart
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+
+        <form class="gk-search" method="GET" action="{% url 'search' %}" role="search">
+
+            <span class="gk-search__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </span>
+
+            <input type="search"
+                   name="q"
+                   value="{{ request.GET.q|default:'' }}"
+                   aria-label="Search"
+                   placeholder="{% if is_vendor_account %}Search my products{% else %}Search products{% endif %}">
+
+        </form>
+
+
+        <div class="gk-actions">
+
+            {% if user.is_authenticated %}
+
+                {% if not is_vendor_account %}
+
+                    <a class="gk-icon-btn" href="{% url 'cart' %}" title="Cart" aria-label="Cart">
+
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+
+                        {% if cart_item_count %}
+                            <span class="gk-badge gk-badge--muted">{{ cart_item_count }}</span>
+                        {% endif %}
+
+                    </a>
+
+                {% endif %}
+
+                <div class="gk-account gk-bell" data-gk-dropdown>
+
+                    <button type="button"
+                            class="gk-icon-btn"
+                            data-gk-toggle
+                            aria-expanded="false"
+                            title="Notifications"
+                            aria-label="Notifications{% if unread_notification_count %} ({{ unread_notification_count }} unread){% endif %}">
+
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+
+                        {% if unread_notification_count %}
+                            <span class="gk-badge">{% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}</span>
+                        {% endif %}
+
+                    </button>
+
+                    <div class="gk-menu gk-bell__menu" data-gk-panel>
+
+                        <div class="gk-bell__head">
+                            <span>Notifications</span>
+                            {% if unread_notification_count %}
+                                <a href="{% url 'mark_all_notifications_read' %}">Mark all read</a>
+                            {% endif %}
+                        </div>
+
+                        {% for notification in recent_notifications %}
+
+                            <a class="gk-bell__item {% if not notification.is_read %}is-unread{% endif %}"
+                               href="{% url 'notification_read' notification.id %}">
+                                <span class="gk-bell__msg">{{ notification.message }}</span>
+                                <span class="gk-bell__time">{{ notification.created_at|timesince }} ago</span>
+                            </a>
+
+                        {% empty %}
+
+                            <div class="gk-bell__empty">You're all caught up.</div>
+
+                        {% endfor %}
+
+                        <div class="gk-menu__sep"></div>
+
+                        <a class="gk-menu__item" href="{% url 'notification_list' %}">
+                            <strong>View all notifications</strong>
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div class="gk-account" data-gk-dropdown>
+
+                    <button type="button"
+                            class="gk-account__btn"
+                            data-gk-toggle
+                            aria-expanded="false">
+
+                        <span class="gk-avatar">
+                            {% if is_vendor_account %}
+                                {{ vendor_profile.business_name|slice:":1" }}
+                            {% else %}
+                                {{ user.full_name|default:user.username|slice:":1" }}
+                            {% endif %}
+                        </span>
+
+                        <span class="gk-account__name">
+                            {% if is_vendor_account %}
+                                {{ vendor_profile.business_name }}
+                            {% else %}
+                                {{ user.full_name|default:user.username }}
+                            {% endif %}
+                        </span>
+
+                        <svg class="gk-link__caret" width="12" height="12" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+
+                    </button>
+
+
+                    <div class="gk-menu" data-gk-panel>
+
+                        <div class="gk-menu__head">
+
+                            <div class="gk-menu__name">
+                                {% if is_vendor_account %}
+                                    {{ vendor_profile.business_name }}
+                                {% else %}
+                                    {{ user.full_name|default:user.username }}
+                                {% endif %}
+                            </div>
+
+                            <div class="gk-menu__mail">{{ user.email }}</div>
+
+                            {% if is_email_verified %}
+                                <span class="gk-chip gk-chip--ok">&#10003; Verified</span>
+                            {% else %}
+                                <span class="gk-chip gk-chip--warn">Email not verified</span>
+                            {% endif %}
+
+                        </div>
+
+                        <a class="gk-menu__item" href="{% url account_home_url %}">
+                            My Profile
+                        </a>
+
+                        <a class="gk-menu__item" href="{% url dashboard_url_name %}">
+                            Dashboard
+                        </a>
+
+                        <a class="gk-menu__item" href="{% url quotes_url_name %}">
+                            {% if is_vendor_account %}Quotation Requests{% else %}My Quotations{% endif %}
+                            {% include 'extend-files/quote_badge.html' %}
+                        </a>
+
+                        {% if is_vendor_account %}
+
+                            <a class="gk-menu__item" href="{% url 'vendor_products' %}">
+                                My Products
+                            </a>
+
+                            <a class="gk-menu__item" href="{% url 'vendor_profile' %}">
+                                Business Settings
+                            </a>
+
+                        {% else %}
+
+                            <a class="gk-menu__item" href="{% url 'orders' %}">
+                                My Orders
+                            </a>
+
+                            <a class="gk-menu__item" href="{% url 'wishlist' %}">
+                                My Wishlist
+                            </a>
+
+                            <a class="gk-menu__item" href="{% url 'address' %}">
+                                My Addresses
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <a class="gk-btn gk-btn--ghost" href="{% url 'login' %}">Log in</a>
+
+                <a class="gk-btn gk-btn--primary" href="{% url 'register' %}">Sign up</a>
+
+            {% endif %}
+
+
+            <button type="button"
+                    class="gk-burger"
+                    data-gk-burger
+                    aria-label="Menu"
+                    aria-expanded="false">
+
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="gk-mobile" data-gk-mobile>
+
+        <form class="gk-search" method="GET" action="{% url 'search' %}" role="search">
+
+            <span class="gk-search__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </span>
+
+            <input type="search"
+                   name="q"
+                   value="{{ request.GET.q|default:'' }}"
+                   aria-label="Search"
+                   placeholder="{% if is_vendor_account %}Search my products{% else %}Search products{% endif %}">
+
+        </form>
+
+        {% if is_vendor_account %}
+
+            <a class="gk-link" href="{% url 'vendor_dashboard' %}">Dashboard</a>
+            <a class="gk-link" href="{% url 'vendor_products' %}">Products</a>
+            <a class="gk-link" href="{% url 'quote_list_vendor' %}">Quotation Requests {% include 'extend-files/quote_badge.html' %}</a>
+            <a class="gk-link" href="{% url 'vendor_add_product' %}">Add Product</a>
+            <a class="gk-link" href="{% url 'vendor_details' %}">My Profile</a>
+
+        {% else %}
+
+            <a class="gk-link" href="{% url 'home' %}">Home</a>
+            <a class="gk-link" href="{% url 'products' %}">Products</a>
+            <a class="gk-link" href="{% url 'categories' %}">Categories</a>
+
+            {% if user.is_authenticated %}
+
+                <a class="gk-link" href="{% url 'quote_list_buyer' %}">My Quotations {% include 'extend-files/quote_badge.html' %}</a>
+                <a class="gk-link" href="{% url 'cart' %}">Cart</a>
+                <a class="gk-link" href="{% url 'orders' %}">My Orders</a>
+                <a class="gk-link" href="{% url 'wishlist' %}">My Wishlist</a>
+                <a class="gk-link" href="{% url 'details' %}">My Profile</a>
+
+            {% else %}
+
+                <a class="gk-link" href="{% url 'vendor_register' %}">Sell on Greatkart</a>
+
+                <div class="gk-mobile__label">Account</div>
+
+                <a class="gk-btn gk-btn--ghost" href="{% url 'login' %}">Log in</a>
+                <a class="gk-btn gk-btn--primary" href="{% url 'register' %}">Sign up</a>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+</nav>
+
+
+<script>
+    (function () {
+
+        var dropdowns = document.querySelectorAll("[data-gk-dropdown]");
+
+        function closeAll(except) {
+            dropdowns.forEach(function (dropdown) {
+                if (dropdown === except) {
+                    return;
+                }
+
+                dropdown.querySelector("[data-gk-panel]")
+                    .classList.remove("is-open");
+
+                dropdown.querySelector("[data-gk-toggle]")
+                    .setAttribute("aria-expanded", "false");
+            });
+        }
+
+        dropdowns.forEach(function (dropdown) {
+
+            var toggle = dropdown.querySelector("[data-gk-toggle]");
+            var panel = dropdown.querySelector("[data-gk-panel]");
+
+            toggle.addEventListener("click", function (event) {
+                event.stopPropagation();
+
+                var willOpen = !panel.classList.contains("is-open");
+
+                closeAll(dropdown);
+
+                panel.classList.toggle("is-open", willOpen);
+                toggle.setAttribute("aria-expanded", String(willOpen));
+            });
+
+            panel.addEventListener("click", function (event) {
+                event.stopPropagation();
+            });
+
+        });
+
+        document.addEventListener("click", function () {
+            closeAll(null);
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeAll(null);
+            }
+        });
+
+        var burger = document.querySelector("[data-gk-burger]");
+        var mobile = document.querySelector("[data-gk-mobile]");
+
+        if (burger && mobile) {
+            burger.addEventListener("click", function (event) {
+                event.stopPropagation();
+
+                var open = mobile.classList.toggle("is-open");
+                burger.setAttribute("aria-expanded", String(open));
+            });
+        }
+
+    })();
+</script>
+
+{% include 'partials/messages.html' %}

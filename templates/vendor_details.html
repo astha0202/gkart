@@ -1,0 +1,1007 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Vendor Details</title>
+
+    <link rel="stylesheet"
+          href="{% static 'style.css' %}">
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+    <style>
+
+        body {
+            background: #f7f8fa;
+        }
+
+        .vendor-page {
+            padding: 45px 15px 60px;
+        }
+
+
+        /* HEADER */
+
+        .vendor-header {
+            margin-bottom: 30px;
+        }
+
+        .vendor-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .vendor-header p {
+            color: #777;
+            font-size: 14px;
+            margin: 0;
+        }
+
+
+        /* PROFILE */
+
+        .profile-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 25px;
+
+            box-shadow: 0 5px 22px rgba(0, 0, 0, 0.07);
+        }
+
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+
+        .profile-icon {
+            width: 65px;
+            height: 65px;
+
+            border-radius: 50%;
+
+            background: #f0f4ff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 28px;
+
+            margin-right: 16px;
+        }
+
+
+        .profile-name h4 {
+            margin: 0 0 4px;
+
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+
+        .profile-name p {
+            margin: 0;
+
+            color: #777;
+            font-size: 13px;
+        }
+
+
+        .verified-badge {
+            display: inline-block;
+
+            margin-top: 6px;
+
+            padding: 4px 9px;
+
+            border-radius: 20px;
+
+            background: #e8f7ee;
+
+            color: #218838;
+
+            font-size: 11px;
+
+            font-weight: 500;
+        }
+
+
+        /* SECTION */
+
+        .info-title {
+            font-size: 16px;
+
+            font-weight: 600;
+
+            padding-bottom: 12px;
+
+            border-bottom: 1px solid #eee;
+
+            margin-bottom: 18px;
+        }
+
+
+        .info-item {
+            margin-bottom: 18px;
+        }
+
+
+        .info-label {
+            display: block;
+
+            color: #888;
+
+            font-size: 12px;
+
+            margin-bottom: 4px;
+        }
+
+
+        .info-value {
+            color: #333;
+
+            font-size: 14px;
+
+            font-weight: 500;
+        }
+
+
+        /* OPTIONS */
+
+        .options-card {
+            background: #fff;
+
+            border-radius: 14px;
+
+            padding: 25px;
+
+            box-shadow: 0 5px 22px rgba(0, 0, 0, 0.07);
+        }
+
+
+        .options-title {
+            font-size: 18px;
+
+            font-weight: 600;
+
+            margin-bottom: 20px;
+        }
+
+
+        .vendor-option {
+            display: flex;
+
+            align-items: center;
+
+            padding: 16px;
+
+            border: 1px solid #eee;
+
+            border-radius: 9px;
+
+            margin-bottom: 12px;
+
+            text-decoration: none !important;
+
+            transition: 0.2s;
+        }
+
+
+        .vendor-option:hover {
+            background: #f8f9fa;
+
+            transform: translateY(-1px);
+        }
+
+
+        .option-icon {
+            width: 43px;
+            height: 43px;
+
+            border-radius: 8px;
+
+            background: #f0f4ff;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 20px;
+
+            margin-right: 14px;
+        }
+
+
+        .option-content {
+            flex: 1;
+        }
+
+
+        .option-content h6 {
+            margin: 0 0 3px;
+
+            color: #333;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        .option-content p {
+            margin: 0;
+
+            color: #888;
+
+            font-size: 12px;
+        }
+
+
+        .arrow {
+            color: #aaa;
+            font-size: 18px;
+        }
+
+
+        /* LOGOUT */
+
+        .logout-option {
+            border-color: #f1d5d5;
+        }
+
+
+        .logout-option .option-icon {
+            background: #fff0f0;
+        }
+
+
+        .logout-option h6 {
+            color: #dc3545;
+        }
+
+
+        /* QUICK STATS */
+
+        .stats-row {
+            margin-bottom: 25px;
+        }
+
+
+        .stat-card {
+            background: #fff;
+
+            border-radius: 12px;
+
+            padding: 20px;
+
+            height: 100%;
+
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+
+        .stat-icon {
+            font-size: 25px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .stat-number {
+            font-size: 24px;
+
+            font-weight: 600;
+
+            color: #333;
+        }
+
+
+        .stat-label {
+            font-size: 12px;
+
+            color: #888;
+        }
+
+
+        /* ORGANIZATION / BANK / TERMS BOXES */
+
+        .org-heading {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .org-heading__icon {
+            font-size: 18px;
+        }
+
+        .profile-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px 20px;
+            height: 100%;
+            border: 1px solid #edf0f4;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .profile-box__head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-box__title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1f2937;
+        }
+
+        .profile-box__num {
+            color: #2563eb;
+        }
+
+        .profile-box__actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .profile-box__actions form {
+            margin: 0;
+        }
+
+        .box-action {
+            display: inline-block;
+            padding: 3px 9px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            background: #fff;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none !important;
+            cursor: pointer;
+        }
+
+        .box-action:hover {
+            background: #f9fafb;
+        }
+
+        .box-action--danger {
+            border-color: #f3c7c3;
+            color: #d92d20;
+        }
+
+        .profile-box__org {
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .profile-box__list {
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 10px 12px;
+            margin: 0;
+            font-size: 13.5px;
+        }
+
+        .profile-box__list dt {
+            color: #8a94a6;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            padding-top: 2px;
+        }
+
+        .profile-box__list dd {
+            margin: 0;
+            text-align: right;
+            font-weight: 600;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .profile-box__empty {
+            color: #8a94a6;
+            font-size: 13.5px;
+        }
+
+        @media (max-width: 767px) {
+
+            .vendor-page {
+                padding-top: 30px;
+            }
+
+            .profile-card,
+            .options-card {
+                padding: 22px;
+            }
+
+            .vendor-header h2 {
+                font-size: 24px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+{% include 'extend-files/navbar.html' %}
+
+
+<div class="container vendor-page">
+
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="vendor-header">
+
+        <h2>
+            Vendor Dashboard
+        </h2>
+
+        <p>
+            Manage your business, products, quotations
+            and orders.
+        </p>
+
+    </div>
+
+
+
+    <!-- ================= PROFILE ================= -->
+
+    <div class="profile-card">
+
+
+        <div class="profile-top">
+
+            <div class="profile-icon">
+                🏢
+            </div>
+
+
+            <div class="profile-name">
+
+                <h4>
+                    {{ vendor.business_name }}
+                </h4>
+
+                <p>
+                    {{ account.email }}
+                </p>
+
+
+                {% if account.is_verified %}
+
+                    <span class="verified-badge">
+                        ✓ Email Verified
+                    </span>
+
+                {% else %}
+
+                    <span class="badge badge-warning">
+                        Email not verified
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+
+        <!-- BUSINESS INFORMATION -->
+
+        <div class="info-title">
+            Business Information
+        </div>
+
+
+        <div class="row">
+
+
+            <div class="col-md-6">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Contact Person
+                    </span>
+
+                    <span class="info-value">
+                        {{ account.full_name }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Phone Number
+                    </span>
+
+                    <span class="info-value">
+                        {{ vendor.phone_number|default:account.phone }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Email Address
+                    </span>
+
+                    <span class="info-value">
+                        {{ account.email }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Username
+                    </span>
+
+                    <span class="info-value">
+                        {{ account.username }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Business Description
+                    </span>
+
+                    <span class="info-value">
+                        {{ vendor.business_description|default:"-" }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================= ORGANIZATION / BANK / TERMS (three boxes) ================= -->
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+
+        <h5 class="mb-2 org-heading">
+            <span class="org-heading__icon">🏢</span>
+            {{ vendor.business_name }}
+        </h5>
+
+        <a href="{% url 'vendor_profile' %}" class="btn btn-sm btn-outline-primary mb-2">
+            ✎ Edit Profile
+        </a>
+
+    </div>
+
+    <div class="row profile-boxes">
+
+        {% for section in profile_sections %}
+
+            <div class="col-lg-4 mb-4">
+
+                <div class="profile-box">
+
+                    <div class="profile-box__head">
+
+                        <span class="profile-box__title">
+                            <span class="profile-box__num">{{ forloop.counter }}.</span>
+                            {{ section.title }}
+                        </span>
+
+                        <span class="profile-box__actions">
+
+                            <a href="{% url 'vendor_profile' %}#{{ section.key }}" class="box-action">
+                                ✎ Edit
+                            </a>
+
+                            {% if not section.is_empty %}
+                                <form method="POST"
+                                      action="{% url 'vendor_profile_section_clear' section.key %}"
+                                      onsubmit="return confirm('Clear all {{ section.title }}? This cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="box-action box-action--danger">
+                                        🗑 Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+                    {% if section.key == 'organization' %}
+                        <div class="profile-box__org">🏢 {{ vendor.business_name }}</div>
+                    {% endif %}
+
+                    {% if section.is_empty %}
+
+                        <div class="profile-box__empty">
+                            Nothing added yet.
+                            <a href="{% url 'vendor_profile' %}#{{ section.key }}">Add {{ section.title|lower }}</a>
+                        </div>
+
+                    {% else %}
+
+                        <dl class="profile-box__list">
+                            {% for label, value in section.rows %}
+                                <dt>{{ label|upper }}</dt>
+                                <dd>
+                                    {% if value %}
+                                        {% if 'website' in label|lower %}
+                                            <a href="{{ value }}" target="_blank" rel="noopener noreferrer">{{ value }}</a>
+                                        {% else %}
+                                            {{ value|linebreaksbr }}
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </dd>
+                            {% endfor %}
+                        </dl>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+
+    <!-- ================= QUICK STATS ================= -->
+
+    <div class="row stats-row">
+
+
+        <div class="col-md-4 mb-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    📦
+                </div>
+
+                <div class="stat-number">
+                    {{ product_count|default:"0" }}
+                </div>
+
+                <div class="stat-label">
+                    Total Products
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    📋
+                </div>
+
+                <div class="stat-number">
+                    {{ quotation_count|default:"0" }}
+                </div>
+
+                <div class="stat-label">
+                    Quotations
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🛒
+                </div>
+
+                <div class="stat-number">
+                    {{ order_count|default:"0" }}
+                </div>
+
+                <div class="stat-label">
+                    Orders
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="row">
+
+
+        <!-- ================= OPTIONS ================= -->
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="options-card">
+
+
+                <div class="options-title">
+                    Business Management
+                </div>
+
+
+                <!-- PRODUCTS -->
+
+                <a href="{% url 'vendor_products' %}"
+                   class="vendor-option">
+
+                    <div class="option-icon">
+                        📦
+                    </div>
+
+                    <div class="option-content">
+
+                        <h6>
+                            My Products
+                        </h6>
+
+                        <p>
+                            Add, edit and manage your products.
+                        </p>
+
+                    </div>
+
+                    <div class="arrow">
+                        ›
+                    </div>
+
+                </a>
+
+
+                <!-- QUOTATIONS -->
+
+                <a href="{% url 'quote_list_vendor' %}"
+                   class="vendor-option">
+
+                    <div class="option-icon">
+                        📋
+                    </div>
+
+                    <div class="option-content">
+
+                        <h6>
+                            Quotations
+                        </h6>
+
+                        <p>
+                            Manage quotation requests and responses.
+                        </p>
+
+                    </div>
+
+                    <div class="arrow">
+                        ›
+                    </div>
+
+                </a>
+
+
+                <!-- ORDERS -->
+
+                <a href="{% url 'vendor_dashboard' %}"
+                   class="vendor-option">
+
+                    <div class="option-icon">
+                        🛒
+                    </div>
+
+                    <div class="option-content">
+
+                        <h6>
+                            My Orders
+                        </h6>
+
+                        <p>
+                            View and manage your customer orders.
+                        </p>
+
+                    </div>
+
+                    <div class="arrow">
+                        ›
+                    </div>
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================= ACCOUNT ================= -->
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="options-card">
+
+
+                <div class="options-title">
+                    Account Settings
+                </div>
+
+
+                <!-- EDIT PROFILE -->
+
+                <a href="{% url 'vendor_profile' %}"
+                   class="vendor-option">
+
+                    <div class="option-icon">
+                        ✏️
+                    </div>
+
+                    <div class="option-content">
+
+                        <h6>
+                            Edit Business Profile
+                        </h6>
+
+                        <p>
+                            Update your business and contact details.
+                        </p>
+
+                    </div>
+
+                    <div class="arrow">
+                        ›
+                    </div>
+
+                </a>
+
+
+                <!-- CHANGE PASSWORD -->
+
+                <a href="{% url 'vendor_forgot_password' %}"
+                   class="vendor-option">
+
+                    <div class="option-icon">
+                        🔐
+                    </div>
+
+                    <div class="option-content">
+
+                        <h6>
+                            Change Password
+                        </h6>
+
+                        <p>
+                            Change your current vendor password.
+                        </p>
+
+                    </div>
+
+                    <div class="arrow">
+                        ›
+                    </div>
+
+                </a>
+
+
+                <!-- LOGOUT -->
+
+                <a href="{% url 'vendor_logout' %}"
+                   class="vendor-option logout-option">
+
+                    <div class="option-icon">
+                        🚪
+                    </div>
+
+                    <div class="option-content">
+
+                        <h6>
+                            Logout
+                        </h6>
+
+                        <p>
+                            Sign out from your vendor account.
+                        </p>
+
+                    </div>
+
+                    <div class="arrow">
+                        ›
+                    </div>
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+{% include 'extend-files/footer.html' %}
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+
+</html>

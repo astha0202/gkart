@@ -1,0 +1,7 @@
+<div class="star-rating">
+    {% for group_name, options, index in widget.optgroups %}
+        {% for option in options %}
+            {% include option.template_name with widget=option %}
+        {% endfor %}
+    {% endfor %}
+</div>

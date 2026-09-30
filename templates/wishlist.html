@@ -1,0 +1,172 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Wishlist</title>
+
+    <link rel="stylesheet"
+          href="{% static 'style.css' %}">
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+{% include 'extend-files/navbar.html' %}
+
+
+<div class="container mt-5 mb-5">
+
+    <h2 class="mb-4">My Wishlist</h2>
+
+
+    {% if wishlist_items %}
+
+        <form method="POST"
+              action="{% url 'clear_wishlist' %}"
+              class="mb-3 text-right">
+
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                Clear wishlist
+            </button>
+
+        </form>
+
+
+        <div class="row">
+
+            {% for item in wishlist_items %}
+
+                <div class="col-md-4 col-lg-3 mb-4">
+
+                    <div class="card h-100">
+
+                        <!-- Product Image -->
+
+                        {% if item.product.images %}
+
+                            <img src="{{ item.product.images.url }}"
+                                 class="card-img-top"
+                                 alt="{{ item.product.product_name }}"
+                                 style="height: 220px; object-fit: contain;">
+
+                        {% endif %}
+
+
+                        <div class="card-body d-flex flex-column">
+
+                            <!-- Product Name -->
+
+                            <h5 class="card-title">
+
+                                {{ item.product.product_name }}
+
+                            </h5>
+
+
+                            <!-- Product Price -->
+
+                            <p class="card-text">
+
+                                <strong>
+                                    ₹{{ item.product.price }}
+                                </strong>
+
+                            </p>
+
+
+                            <!-- Buttons -->
+
+                            <div class="mt-auto">
+
+                                <form method="POST"
+                                      action="{% url 'move_to_cart' item.id %}">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="btn btn-primary btn-block mb-2"
+                                            {% if not item.product.is_available or item.product.stock < 1 %}disabled{% endif %}>
+
+                                        {% if item.product.stock < 1 %}
+                                            Out of Stock
+                                        {% else %}
+                                            Move to Cart
+                                        {% endif %}
+
+                                    </button>
+
+                                </form>
+
+
+                                <form method="POST"
+                                      action="{% url 'remove_from_wishlist' item.id %}">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-block">
+
+                                        Remove
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+        <div class="text-center py-5">
+
+            <h4>
+                Your wishlist is empty.
+            </h4>
+
+            <p class="text-muted">
+                Save products you love and find them here later.
+            </p>
+
+            <a href="{% url 'home' %}"
+               class="btn btn-primary">
+
+                Continue Shopping
+
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+{% include 'extend-files/footer.html' %}
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

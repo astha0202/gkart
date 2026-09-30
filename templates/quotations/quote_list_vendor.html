@@ -1,0 +1,140 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quotations - Vendor</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    {% include "extend-files/navbar.html" %}
+
+    <div class="container mt-5 mb-5">
+
+        <h2 class="mb-4">Quotations</h2>
+
+
+        <h5 class="mb-3">Pending Requests ({{ pending_quotes.count }})</h5>
+
+        {% if pending_quotes %}
+
+            <div class="table-responsive mb-5">
+
+                <table class="table table-bordered bg-white">
+
+                    <thead>
+                        <tr>
+                            <th>Quote #</th>
+                            <th>Buyer</th>
+                            <th>Items</th>
+                            <th>Requested Delivery</th>
+                            <th>Requested On</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for quote in pending_quotes %}
+
+                            <tr>
+                                <td>{{ quote.quote_number }}</td>
+                                <td>{{ quote.buyer.full_name|default:quote.buyer.username }}</td>
+                                <td>{{ quote.items.count }}</td>
+                                <td>{{ quote.requested_delivery_date|default:"-" }}</td>
+                                <td>{{ quote.created_at|date:"d M Y" }}</td>
+                                <td>
+                                    <a href="{% url 'quote_send' quote.quote_number %}"
+                                       class="btn btn-sm btn-primary">
+                                        Price & Send
+                                    </a>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="text-muted mb-5">No pending quotation requests.</p>
+
+        {% endif %}
+
+        <h5 class="mb-3">Sent / Past Quotations ({{ sent_quotes.count }})</h5>
+
+        {% if sent_quotes %}
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered bg-white">
+
+                    <thead>
+                        <tr>
+                            <th>Quote #</th>
+                            <th>Buyer</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for quote in sent_quotes %}
+
+                            <tr>
+                                <td>{{ quote.quote_number }}</td>
+                                <td>{{ quote.buyer.full_name|default:quote.buyer.username }}</td>
+                                <td>
+                                    <span class="badge badge-secondary text-uppercase">
+                                        {{ quote.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>₹{{ quote.total }}</td>
+                                <td>
+                                    <a href="{% url 'quote_detail' quote.quote_number %}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="text-muted">No sent quotations yet.</p>
+
+        {% endif %}
+
+    </div>
+
+    {% include "extend-files/footer.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

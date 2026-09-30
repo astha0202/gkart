@@ -1,0 +1,4 @@
+{% comment %}
+Flashing count of unread quotation updates (unread notifications that link
+into /quotations/). Rendered next to every "Quotations" link in the navbar.
+{% endcomment %}{% if unread_quotation_count %}<span class="gk-count" title="{{ unread_quotation_count }} unread quotation update{{ unread_quotation_count|pluralize }}" aria-label="{{ unread_quotation_count }} unread quotation update{{ unread_quotation_count|pluralize }}">{% if unread_quotation_count > 99 %}99+{% else %}{{ unread_quotation_count }}{% endif %}</span>{% endif %}

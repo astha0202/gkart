@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ title }} {{ number }}</title>
+
+    <style>
+        :root {
+            --ink: #0f172a;
+            --navy: #1e293b;
+            --accent: #f59e0b;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --soft: #f8fafc;
+            --head: #eef2f7;
+            --blue: #1d4ed8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #e9edf2;
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 13.5px;
+        }
+
+        /* ---------- toolbar (screen only) ---------- */
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 22px;
+            background: var(--navy);
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .toolbar__badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: var(--accent);
+            color: var(--navy);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+        }
+
+        .toolbar__spacer { flex: 1; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn--primary { background: #2563eb; color: #fff; }
+        .btn--primary:hover { background: #1d4ed8; }
+        .btn--ghost { background: transparent; border-color: #475569; color: #e2e8f0; }
+        .btn--ghost:hover { background: #334155; }
+
+        /* ---------- paper ---------- */
+
+        .paper {
+            max-width: 900px;
+            margin: 26px auto 60px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .10);
+            overflow: hidden;
+        }
+
+        .doc-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 24px 30px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #fff;
+            border-bottom: 4px solid var(--accent);
+        }
+
+        .doc-head h1 {
+            margin: 0 0 4px;
+            font-size: 22px;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .doc-head .sub {
+            color: #cbd5e1;
+            font-size: 12.5px;
+        }
+
+        .doc-ref {
+            text-align: right;
+            font-size: 12.5px;
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        .doc-ref .ref-badge {
+            display: inline-block;
+            margin-bottom: 4px;
+            padding: 4px 10px;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 12px;
+        }
+
+        .doc-body { padding: 26px 30px 30px; }
+
+        .section { margin-bottom: 26px; }
+
+        .section-title {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin: 0 0 10px;
+            padding-bottom: 7px;
+            border-bottom: 2px solid #fde6b8;
+            color: var(--navy);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .section-title .num {
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .section-hint {
+            margin: -4px 0 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* ---------- parties ---------- */
+
+        .parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr 170px;
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--blue);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .party {
+            padding: 14px 16px;
+            background: var(--soft);
+        }
+
+        .party + .party { border-left: 1px solid var(--line); }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 4px 10px;
+            font-size: 12.5px;
+        }
+
+        .kv dt {
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            padding-top: 2px;
+        }
+
+        .kv dd {
+            margin: 0;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .party-label {
+            margin-bottom: 8px;
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+        }
+
+        .qr {
+            padding: 12px;
+            text-align: center;
+            border-left: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .qr svg {
+            width: 118px;
+            height: 118px;
+            display: block;
+            margin: 0 auto 6px;
+        }
+
+        .qr .cap {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .qr .cap-sub {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        /* ---------- items ---------- */
+
+        table.items {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        table.items th {
+            background: var(--head);
+            color: var(--navy);
+            text-align: left;
+            font-size: 11px;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        table.items td {
+            padding: 10px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+
+        table.items tbody tr:nth-child(even) td { background: var(--soft); }
+
+        table.items .num-col { text-align: right; white-space: nowrap; }
+
+        .muted { color: var(--muted); }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+            margin-top: 14px;
+        }
+
+        .words {
+            padding: 12px 14px;
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            font-size: 12.5px;
+        }
+
+        .words .label, .block .label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+        }
+
+        .totals { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .totals td { padding: 5px 2px; }
+        .totals td:last-child { text-align: right; font-weight: 600; }
+        .totals tr.grand td {
+            padding: 10px 12px;
+            background: var(--navy);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        /* ---------- payment / terms ---------- */
+
+        .blocks {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .block { padding: 14px 16px; }
+        .block + .block { border-left: 1px solid var(--line); }
+
+        .notes {
+            padding: 12px 14px;
+            border-left: 4px solid var(--accent);
+            border-radius: 6px;
+            background: #fffaf0;
+            font-size: 12.5px;
+            white-space: pre-line;
+        }
+
+        .sign {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .sign div {
+            min-width: 220px;
+            text-align: center;
+            font-size: 12.5px;
+        }
+
+        .sign .line {
+            margin-top: 44px;
+            padding-top: 6px;
+            border-top: 1px solid #94a3b8;
+            color: var(--muted);
+        }
+
+        .foot {
+            padding: 12px 30px;
+            border-top: 1px solid var(--line);
+            background: var(--soft);
+            color: var(--muted);
+            font-size: 11px;
+            text-align: center;
+        }
+
+        @media (max-width: 760px) {
+            .doc-head, .summary { display: block; }
+            .doc-ref { text-align: left; margin-top: 12px; }
+            .parties, .blocks { grid-template-columns: 1fr; }
+            .party + .party, .qr, .block + .block { border-left: 0; border-top: 1px solid var(--line); }
+            .summary .words { margin-bottom: 14px; }
+            .doc-body { padding: 20px 16px; }
+            .toolbar { flex-wrap: wrap; }
+        }
+
+        @media print {
+            body { background: #fff; }
+            .toolbar { display: none; }
+            .paper { margin: 0; max-width: none; box-shadow: none; border-radius: 0; }
+            .doc-head, .totals tr.grand td, table.items th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .section { break-inside: avoid; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="toolbar">
+    <span class="toolbar__badge">{{ title }}</span>
+    <span class="toolbar__spacer"></span>
+
+    <a class="btn btn--ghost" href="{% url 'quote_detail' quote.quote_number %}">&larr; Back to quotation</a>
+
+    {% if kind == 'proforma' %}
+        <a class="btn btn--ghost" href="{% url 'pi_download' number %}">Download PDF</a>
+    {% else %}
+        <a class="btn btn--ghost" href="{% url 'tax_invoice_download' quote.quote_number %}">Download PDF</a>
+    {% endif %}
+
+    <button type="button" class="btn btn--primary" onclick="window.print()">&#128424; Print</button>
+</div>
+
+
+<div class="paper">
+
+    <div class="doc-head">
+
+        <div>
+            <h1>{{ title }}</h1>
+            <div class="sub">{{ quote.vendor.business_name }}</div>
+            {% if quote.vendor.business_address %}
+                <div class="sub">{{ quote.vendor.business_address|linebreaksbr }}</div>
+            {% endif %}
+        </div>
+
+        <div class="doc-ref">
+            <div class="ref-badge">{{ number }}</div><br>
+            Date: {{ issued_at|date:"d M Y" }}<br>
+            PO: {{ purchase_order.po_number }} &middot; Quotation: {{ quote.quote_number }}
+        </div>
+
+    </div>
+
+
+    <div class="doc-body">
+
+        {# ---------- 01 parties ---------- #}
+
+        <div class="section">
+
+            <h2 class="section-title"><span class="num">01</span> Seller &amp; Customer Details</h2>
+
+            <div class="parties">
+
+                <div class="party">
+                    <div class="party-label">Seller</div>
+                    <dl class="kv">
+                        <dt>Name</dt><dd>{{ quote.vendor.business_name }}</dd>
+                        <dt>GSTIN</dt><dd>{{ quote.vendor_gst_number|default:quote.vendor.gst_number|default:"-" }}</dd>
+                        {% if quote.vendor.pan_number %}<dt>PAN</dt><dd>{{ quote.vendor.pan_number }}</dd>{% endif %}
+                        <dt>Email</dt><dd>{{ quote.vendor.business_email|default:quote.vendor.account.email }}</dd>
+                        <dt>Phone</dt><dd>{{ quote.vendor.phone_number|default:"-" }}</dd>
+                    </dl>
+                </div>
+
+                <div class="party">
+                    <div class="party-label">Bill To</div>
+                    <dl class="kv">
+                        <dt>Customer</dt><dd>{{ quote.contact_name|default:quote.buyer.full_name }}</dd>
+                        <dt>GSTIN</dt><dd>{{ quote.buyer_gst_number|default:"-" }}</dd>
+                        <dt>PAN</dt><dd>{{ quote.buyer_pan_number|default:"-" }}</dd>
+                        <dt>Email</dt><dd>{{ quote.contact_email|default:quote.buyer.email }}</dd>
+                        <dt>Phone</dt><dd>{{ quote.contact_phone|default:quote.buyer.phone }}</dd>
+                        {% if quote.billing_address %}<dt>Address</dt><dd>{{ quote.billing_address|linebreaksbr }}</dd>{% endif %}
+                    </dl>
+                </div>
+
+                <div class="qr">
+                    {{ qr_code|safe }}
+                    <div class="cap">Status &amp; specs QR</div>
+                    <div class="cap-sub">Scan for live status on your phone</div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {# ---------- 02 items ---------- #}
+
+        <div class="section">
+
+            <h2 class="section-title"><span class="num">02</span> Item Details</h2>
+
+            <table class="items">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;">S.No</th>
+                        <th>Item Name</th>
+                        <th class="num-col">Qty</th>
+                        <th class="num-col">Unit Price</th>
+                        <th class="num-col">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in quote.items.all %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <strong>{{ item.product.product_name }}</strong>
+                                {% if item.supporting_link %}
+                                    <br><a href="{{ item.supporting_link }}" target="_blank" rel="noopener noreferrer"
+                                           class="muted" style="font-size: 11.5px;">Supporting link &#8599;</a>
+                                {% endif %}
+                            </td>
+                            <td class="num-col">{{ item.quantity }}</td>
+                            <td class="num-col">₹{{ item.effective_price }}</td>
+                            <td class="num-col">₹{{ item.line_total }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="summary">
+
+                <div class="words">
+                    <span class="label">Amount in words</span>
+                    {{ amount_words }}
+                </div>
+
+                <table class="totals">
+                    <tr><td class="muted">Subtotal</td><td>₹{{ quote.subtotal }}</td></tr>
+                    {% if quote.discount %}
+                        <tr><td class="muted">Discount</td><td>- ₹{{ quote.discount }}</td></tr>
+                    {% endif %}
+                    <tr><td class="muted">Taxable amount</td><td>₹{{ quote.taxable_amount }}</td></tr>
+                    <tr><td class="muted">GST @ {{ quote.tax_rate|floatformat:"-2" }}%</td><td>₹{{ quote.tax }}</td></tr>
+                    {% if quote.shipping_charges %}
+                        <tr><td class="muted">Delivery / freight</td><td>₹{{ quote.shipping_charges }}</td></tr>
+                    {% endif %}
+                    {% if quote.packaging_charges %}
+                        <tr><td class="muted">Packaging &amp; handling</td><td>₹{{ quote.packaging_charges }}</td></tr>
+                    {% endif %}
+                    <tr class="grand"><td>Grand Total</td><td>₹{{ quote.total }}</td></tr>
+                </table>
+
+            </div>
+
+        </div>
+
+
+        {# ---------- 03 workflow ---------- #}
+
+        <div class="section">
+
+            <h2 class="section-title"><span class="num">03</span> Quotation to Delivery Workflow</h2>
+
+            {% include "quotations/partials/stepper.html" with steps=steps %}
+
+        </div>
+
+
+        {# ---------- 04 payment + terms ---------- #}
+
+        <div class="section">
+
+            <h2 class="section-title"><span class="num">04</span> Payment &amp; Terms</h2>
+
+            <div class="blocks">
+
+                <div class="block">
+                    <span class="label">Pay to</span>
+                    <dl class="kv">
+                        <dt>Bank</dt><dd>{{ quote.vendor_bank_name|default:quote.vendor.bank_name|default:"-" }}</dd>
+                        <dt>A/C holder</dt><dd>{{ quote.vendor_bank_account_name|default:quote.vendor.bank_account_name|default:"-" }}</dd>
+                        <dt>A/C no.</dt><dd>{{ quote.vendor_bank_account_number|default:quote.vendor.bank_account_number|default:"-" }}</dd>
+                        <dt>IFSC</dt><dd>{{ quote.vendor_bank_ifsc|default:quote.vendor.bank_ifsc|default:"-" }}</dd>
+                        {% if quote.vendor.bank_branch %}<dt>Branch</dt><dd>{{ quote.vendor.bank_branch }}</dd>{% endif %}
+                    </dl>
+                </div>
+
+                <div class="block">
+                    <span class="label">Terms &amp; conditions</span>
+                    <dl class="kv">
+                        <dt>Payment</dt><dd>{{ quote.payment_terms|default:quote.vendor.terms_payment|default:"-" }}</dd>
+                        <dt>Delivery</dt>
+                        <dd>
+                            {% if quote.delivery_days is not None %}{{ quote.delivery_days }} days from confirmed PO
+                            {% else %}{{ quote.vendor.terms_delivery|default:"-" }}{% endif %}
+                        </dd>
+                        <dt>Validity</dt>
+                        <dd>
+                            {% if quote.valid_until %}Until {{ quote.valid_until|date:"d M Y" }}
+                            {% else %}{{ quote.vendor.terms_validity|default:"-" }}{% endif %}
+                        </dd>
+                        {% if quote.warranty_terms %}<dt>Warranty</dt><dd>{{ quote.warranty_terms }}</dd>{% endif %}
+                    </dl>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if quote.vendor_notes or quote.vendor.terms_remarks %}
+
+            <div class="section">
+                <h2 class="section-title"><span class="num">05</span> Notes</h2>
+                <div class="notes">{{ quote.vendor_notes|default:quote.vendor.terms_remarks }}</div>
+            </div>
+
+        {% endif %}
+
+
+        <div class="sign">
+            <div>
+                <strong>For {{ quote.vendor.business_name }}</strong>
+                <div class="line">Authorised Signatory</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="foot">
+        This is a computer-generated {{ title|lower }} and does not require a physical signature.
+    </div>
+
+</div>
+
+</body>
+
+</html>

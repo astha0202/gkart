@@ -1,0 +1,70 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Notifications</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    {% include "extend-files/navbar.html" %}
+
+    <div class="container mt-5 mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Notifications</h2>
+
+            {% if notifications %}
+                <a href="{% url 'mark_all_notifications_read' %}" class="btn btn-sm btn-outline-secondary">
+                    Mark all as read
+                </a>
+            {% endif %}
+        </div>
+
+        {% if notifications %}
+
+            <div class="list-group">
+
+                {% for notification in notifications %}
+
+                    <a href="{% url 'notification_read' notification.id %}"
+                       class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-light font-weight-bold{% endif %}">
+
+                        {{ notification.message }}
+
+                        <small class="d-block text-muted font-weight-normal">
+                            {{ notification.created_at|date:"d M Y H:i" }}
+                        </small>
+
+                    </a>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p class="text-muted">You have no notifications yet.</p>
+
+        {% endif %}
+
+    </div>
+
+    {% include "extend-files/footer.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

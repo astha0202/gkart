@@ -1,0 +1,337 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Compare Vendor Quotations</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+
+    <style>
+
+        body {
+            background: #f7f8fa;
+        }
+
+        .compare-container {
+            max-width: 1150px;
+            margin: 40px auto;
+        }
+
+        .recommendation {
+            background: #eaf7ee;
+            border: 1px solid #bcdfc7;
+            border-radius: 12px;
+            padding: 22px 24px;
+            margin-bottom: 28px;
+        }
+
+        .recommendation h5 {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .vendor-card {
+            background: #fff;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 22px;
+            height: 100%;
+            position: relative;
+            transition: box-shadow .15s ease;
+        }
+
+        .vendor-card:hover {
+            box-shadow: 0 4px 18px rgba(0,0,0,.09);
+        }
+
+        .vendor-card.best {
+            border-color: #28a745;
+            box-shadow: 0 4px 18px rgba(40,167,69,.15);
+        }
+
+        .best-flag {
+            position: absolute;
+            top: -13px;
+            left: 20px;
+            background: #28a745;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .vendor-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .vendor-total {
+            font-size: 30px;
+            font-weight: 700;
+            margin: 12px 0 2px;
+        }
+
+        .vendor-meta {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .vendor-meta strong {
+            color: #333;
+        }
+
+        .badge-pill-soft {
+            display: inline-block;
+            background: #eef4ff;
+            color: #2b5fb3;
+            border-radius: 20px;
+            font-size: 12px;
+            padding: 3px 11px;
+            margin: 0 4px 4px 0;
+        }
+
+        .awaiting-card {
+            border-style: dashed;
+            background: #fbfbfc;
+        }
+
+        .rank-chip {
+            flex-shrink: 0;
+            padding: 2px 9px;
+            border-radius: 20px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
+
+        .rank-chip.is-1 { background: #dcfce7; color: #166534; }
+        .rank-chip.is-2 { background: #dbeafe; color: #1e40af; }
+        .rank-chip.is-3 { background: #fef3c7; color: #92400e; }
+
+    </style>
+
+</head>
+
+<body>
+
+{% include "extend-files/navbar.html" %}
+
+
+<div class="container compare-container">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
+
+        <div>
+            <h2 class="mb-1">Compare Vendor Quotations</h2>
+            <p class="text-muted mb-0">
+                Every vendor response to the same request, in one place.
+            </p>
+        </div>
+
+        <a href="{% url 'quote_list_buyer' %}" class="btn btn-outline-secondary">
+            ← All my quotations
+        </a>
+
+    </div>
+
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            What you asked for
+        </div>
+
+        <div class="card-body">
+
+            <ul class="mb-0">
+                {% for item in items %}
+                    <li>
+                        {{ item.product.product_name }} &times; {{ item.quantity }}
+                        <span class="text-muted">
+                            (listed at ₹{{ item.listed_price }} by {{ item.quote.vendor.business_name }})
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+
+    </div>
+
+
+    {% if best %}
+
+        <div class="recommendation">
+
+            <h5>✅ Best for you: {{ best.quote.vendor.business_name }}</h5>
+
+            <p class="mb-2">{{ best.reason }}</p>
+
+            <a href="{% url 'quote_compare_detail' request_group %}"
+               class="btn btn-success btn-sm">
+                See the full side-by-side comparison
+            </a>
+
+            <a href="{% url 'quote_detail' best.quote.quote_number %}"
+               class="btn btn-outline-success btn-sm">
+                Open {{ best.quote.quote_number }}
+            </a>
+
+        </div>
+
+    {% elif awaiting %}
+
+        <div class="alert alert-info">
+            Your request is with {{ awaiting|length }} vendor(s). A
+            recommendation will appear here as soon as the first priced
+            response comes back.
+        </div>
+
+    {% endif %}
+
+
+    <div class="row">
+
+        {% for row in rows %}
+
+            <div class="col-lg-4 col-md-6 mb-4">
+
+                <a href="{% url 'quote_compare_detail' request_group %}"
+                   class="text-decoration-none text-dark">
+
+                    <div class="vendor-card {% if row.is_best %}best{% endif %} {% if row.score is None %}awaiting-card{% endif %}">
+
+                        {% if row.is_best %}
+                            <span class="best-flag">BEST FOR YOU</span>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="vendor-name">
+                                {% if row.rank %}#{{ row.rank }} &middot; {% endif %}{{ row.quote.vendor.business_name }}
+                            </div>
+                            <span class="rank-chip {% if row.rank == 1 %}is-1{% elif row.rank == 2 %}is-2{% elif row.rank == 3 %}is-3{% endif %}">
+                                {{ row.rank_label }}
+                            </span>
+                        </div>
+
+                        <div class="vendor-meta">
+                            {{ row.quote.quote_number }} ·
+                            {{ row.quote.get_status_display }}
+                        </div>
+
+                        {% if row.score is not None %}
+
+                            <div class="vendor-total">
+                                ₹{{ row.quote.total }}
+                            </div>
+
+                            <div class="vendor-meta mb-3">
+                                Subtotal ₹{{ row.quote.subtotal }} ·
+                                GST {{ row.quote.tax_rate|floatformat:"-2" }}% ₹{{ row.quote.tax }} ·
+                                Freight ₹{{ row.quote.shipping_charges }}
+                                {% if row.quote.packaging_charges %}
+                                    · Packaging ₹{{ row.quote.packaging_charges }}
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {% for badge in row.badges %}
+                                    <span class="badge-pill-soft">{{ badge }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="vendor-meta">
+                                <div>
+                                    Delivery:
+                                    <strong>
+                                        {% if row.quote.delivery_days is not None %}
+                                            {{ row.quote.delivery_days }} days
+                                        {% else %}
+                                            not stated
+                                        {% endif %}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    Payment:
+                                    <strong>{{ row.quote.payment_terms|default:"not stated" }}</strong>
+                                </div>
+
+                                <div>
+                                    Warranty:
+                                    <strong>{{ row.quote.warranty_terms|default:"not stated" }}</strong>
+                                </div>
+
+                                <div>
+                                    Valid until:
+                                    <strong>{{ row.quote.valid_until|default:"not stated" }}</strong>
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                            <div class="vendor-total text-muted">
+                                —
+                            </div>
+
+                            <div class="vendor-meta">
+                                Waiting for this vendor to price the request.
+                                <br>
+                                Estimated at listed prices: ₹{{ row.quote.total }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <div class="d-flex justify-content-between align-items-center mt-2 mb-3">
+        <h5 class="mb-0">Item-by-Item Rate Comparison Matrix</h5>
+        <span class="text-muted small">{{ item_matrix|length }} item{{ item_matrix|length|pluralize }}</span>
+    </div>
+
+    <div class="mb-4">
+        {% include "quotations/partials/item_matrix.html" with rows=rows item_matrix=item_matrix %}
+    </div>
+
+
+    {% if priced_rows %}
+
+        <div class="text-center mt-2">
+            <a href="{% url 'quote_compare_detail' request_group %}"
+               class="btn btn-primary">
+                Open detailed comparison of every field
+            </a>
+        </div>
+
+    {% endif %}
+
+
+</div>
+
+{% include "extend-files/footer.html" %}
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

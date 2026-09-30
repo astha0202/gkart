@@ -1,0 +1,159 @@
+<footer class="bg-dark text-white mt-5">
+
+    <div class="container py-5">
+
+        <div class="row">
+
+            <!-- About -->
+            <div class="col-md-4">
+
+                <h5>Greatkart</h5>
+
+                <p>
+                    Your one-stop online shopping destination
+                    for quality products at great prices.
+                </p>
+
+            </div>
+            <div class="col-md-2">
+
+                <h5>Quick Links</h5>
+
+                <ul class="list-unstyled">
+
+                    {% if is_vendor_account %}
+
+                        <li>
+                            <a href="{% url 'vendor_dashboard' %}" class="text-white">
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'vendor_products' %}" class="text-white">
+                                My Products
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'vendor_add_product' %}" class="text-white">
+                                Add Product
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'quote_list_vendor' %}" class="text-white">
+                                Quotation Requests
+                            </a>
+                        </li>
+
+                    {% else %}
+
+                        <li>
+                            <a href="{% url 'home' %}" class="text-white">
+                                Home
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'products' %}" class="text-white">
+                                Products
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'categories' %}" class="text-white">
+                                Categories
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'cart' %}" class="text-white">
+                                Cart
+                            </a>
+                        </li>
+
+                    {% endif %}
+
+                </ul>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <h5>{% if is_vendor_account %}Your Account{% else %}Customer Service{% endif %}</h5>
+
+                <ul class="list-unstyled">
+
+                    <li>
+                        <a href="{% url account_home_url %}" class="text-white">
+                            {% if is_vendor_account %}My Business{% else %}My Account{% endif %}
+                        </a>
+                    </li>
+
+                    {% if not is_vendor_account %}
+
+                        <li>
+                            <a href="{% url 'orders' %}" class="text-white">
+                                Orders
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'wishlist' %}" class="text-white">
+                                Wishlist
+                            </a>
+                        </li>
+
+                    {% else %}
+
+                        <li>
+                            <a href="{% url 'vendor_profile' %}" class="text-white">
+                                Business Settings
+                            </a>
+                        </li>
+
+                    {% endif %}
+
+                    <li>
+                        <a href="{% url 'contact' %}" class="text-white">
+                            Contact Us
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'contact' %}" class="text-white">
+                            Help &amp; Support
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <h5>Contact Us</h5>
+
+                <p class="mb-1">📧 support@greatkart.com</p>
+                <p class="mb-1">📞 +91 blah blah blah</p>
+                <p>📍 India</p>
+
+            </div>
+
+        </div>
+
+        <hr class="bg-light">
+
+        <div class="text-center">
+
+            <p class="mb-0">
+                &copy; {% now "Y" %} Greatkart. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </div>
+
+</footer>

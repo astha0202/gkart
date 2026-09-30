@@ -1,0 +1,231 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Orders</title>
+
+    <link rel="stylesheet"
+          href="{% static 'style.css' %}">
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+{% include 'extend-files/navbar.html' %}
+
+
+<div class="container mt-5 mb-5">
+
+    <h2 class="mb-4">My Orders</h2>
+
+
+    {% if orders %}
+
+        {% for order in orders %}
+
+            <div class="card mb-4">
+
+                <div class="card-header">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+
+                            <strong>
+                                Order #{{ order.id }}
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-6 text-md-right">
+
+                            {{ order.created_at|date:"d M Y" }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+
+                            <p>
+                                <strong>Order Status:</strong>
+
+                                {% if order.status == "Completed" %}
+
+                                    <span class="badge badge-success">
+                                        {{ order.status }}
+                                    </span>
+
+                                {% elif order.status == "Pending" %}
+
+                                    <span class="badge badge-warning">
+                                        {{ order.status }}
+                                    </span>
+
+                                {% elif order.status == "Cancelled" %}
+
+                                    <span class="badge badge-danger">
+                                        {{ order.status }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-info">
+                                        {{ order.status }}
+                                    </span>
+
+                                {% endif %}
+                            </p>
+
+                        </div>
+
+
+                        <div class="col-md-6 text-md-right">
+
+                            <p>
+                                <strong>
+                                    Total:
+                                </strong>
+
+                                ₹{{ order.total_amount }}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr>
+
+                    {% for item in order.order_products.all %}
+
+                        <div class="row align-items-center mb-3">
+
+                            <div class="col-md-2">
+
+                                {% if item.product.images %}
+
+                                    <img src="{{ item.product.images.url }}"
+                                         class="img-fluid"
+                                         alt="{{ item.product.product_name }}">
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-5">
+
+                                <h6>
+                                    {{ item.product.product_name }}
+                                </h6>
+
+                                <p class="text-muted mb-0">
+
+                                    Quantity:
+                                    {{ item.quantity }}
+
+                                </p>
+
+                            </div>
+
+
+                            <div class="col-md-2">
+
+                                ₹{{ item.product_price }}
+
+                            </div>
+
+
+                            <div class="col-md-3 text-md-right">
+
+                                ₹{{ item.sub_total }}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    <hr>
+
+                    <div class="row">
+
+                        <div class="col-md-9 text-md-right">
+
+                            <strong>
+                                Order Total:
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-3 text-md-right">
+
+                            <strong>
+                                ₹{{ order.total_amount }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+    {% else %}
+
+        <div class="text-center py-5">
+
+            <h4>
+                You haven't placed any orders yet.
+            </h4>
+
+            <p class="text-muted">
+                Your orders will appear here after you make a purchase.
+            </p>
+
+            <a href="{% url 'home' %}"
+               class="btn btn-primary">
+
+                Continue Shopping
+
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+{% include 'extend-files/footer.html' %}
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

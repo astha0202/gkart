@@ -1,0 +1,24 @@
+<div class="rating-histogram">
+
+    {% for row in histogram %}
+
+        <div class="histogram-row d-flex align-items-center mb-1">
+
+            <span class="histogram-star">{{ row.star }}&#9733;</span>
+
+            <div class="progress flex-grow-1 mx-2" style="height: 8px;">
+                <div class="progress-bar bg-warning" role="progressbar"
+                     style="width: {{ row.percent }}%;"
+                     aria-valuenow="{{ row.percent }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+
+            <span class="histogram-count text-muted">{{ row.count }}</span>
+
+        </div>
+
+    {% endfor %}
+
+</div>

@@ -1,0 +1,160 @@
+{% comment %}
+Item-by-item rate comparison. Pass `rows` (ranked comparison rows) and
+`item_matrix` (comparison.item_rate_matrix(rows)).
+{% endcomment %}
+
+<style>
+    .im-table {
+        background: #fff;
+        font-size: 13.5px;
+    }
+
+    .im-table thead th {
+        background: #1e293b;
+        color: #fff;
+        font-size: 11.5px;
+        letter-spacing: .3px;
+        text-transform: uppercase;
+        vertical-align: middle;
+        border-color: #334155;
+    }
+
+    .im-table thead th.im-best-vendor {
+        background: #166534;
+    }
+
+    .im-table td {
+        vertical-align: middle;
+    }
+
+    .im-cell-best {
+        background: #dcfce7 !important;
+        box-shadow: inset 0 0 0 2px #16a34a;
+    }
+
+    .im-rate {
+        font-weight: 700;
+    }
+
+    .im-sub {
+        display: block;
+        font-size: 11.5px;
+        color: #64748b;
+    }
+
+    .im-tag {
+        display: inline-block;
+        margin-top: 3px;
+        padding: 1px 7px;
+        border-radius: 10px;
+        background: #16a34a;
+        color: #fff;
+        font-size: 10.5px;
+        font-weight: 700;
+    }
+
+    .im-best-col {
+        background: #f0fdf4;
+        color: #166534;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .im-total td {
+        background: #f8fafc;
+        font-weight: 800;
+    }
+</style>
+
+<div class="table-responsive">
+
+    <table class="table table-bordered im-table mb-0">
+
+        <thead>
+            <tr>
+                <th style="width: 40px;">#</th>
+                <th>Component item</th>
+                <th style="width: 60px;">Qty</th>
+
+                {% for row in rows %}
+                    <th class="text-center {% if row.is_best %}im-best-vendor{% endif %}">
+                        {{ row.quote.vendor.business_name }}
+                        <span class="d-block" style="font-weight: 400; opacity: .8;">
+                            ({{ row.quote.quote_number }})
+                        </span>
+                        {% if row.is_best %}
+                            <span class="im-tag" style="background: #fff; color: #166534;">BEST FOR YOU</span>
+                        {% endif %}
+                    </th>
+                {% endfor %}
+
+                <th class="text-center">Best rate</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for line in item_matrix %}
+
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ line.name }}</strong></td>
+                    <td>{{ line.quantity }}</td>
+
+                    {% for cell in line.cells %}
+
+                        {% if cell %}
+                            <td class="text-center {% if cell.is_best_rate %}im-cell-best{% endif %}">
+                                <span class="im-rate">₹{{ cell.unit_price }}</span> <small>/pc</small>
+                                <span class="im-sub">Total: ₹{{ cell.line_total }}</span>
+                                {% if cell.is_estimate %}
+                                    <span class="im-sub"><em>listed price, not quoted yet</em></span>
+                                {% elif cell.is_best_rate %}
+                                    <span class="im-tag">&#10003; Lowest rate</span>
+                                {% endif %}
+                            </td>
+                        {% else %}
+                            <td class="text-center text-muted">Not offered</td>
+                        {% endif %}
+
+                    {% endfor %}
+
+                    <td class="text-center im-best-col">
+                        {% if line.best_rate is not None %}
+                            ₹{{ line.best_rate }}
+                        {% else %}
+                            <span class="text-muted" style="font-weight: 400;">Awaiting</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="{{ rows|length|add:4 }}" class="text-center text-muted">No items.</td>
+                </tr>
+
+            {% endfor %}
+
+            <tr class="im-total">
+                <td colspan="3" class="text-right">Grand total (incl. GST &amp; charges)</td>
+
+                {% for row in rows %}
+                    <td class="text-center {% if row.is_best %}im-cell-best{% endif %}">
+                        ₹{{ row.quote.total }}
+                        {% if row.score is None %}
+                            <span class="im-sub"><em>estimate</em></span>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+
+                <td class="im-best-col text-center">
+                    {% if rows.0.score is not None %}₹{{ rows.0.quote.total }}{% else %}—{% endif %}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>

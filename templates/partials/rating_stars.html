@@ -1,0 +1,30 @@
+{% load review_extras %}
+<span class="rating-stars-display" title="{{ avg_rating|default:0|floatformat:1 }} out of 5">
+
+    {% for n in "12345" %}
+
+        {% with state=avg_rating|star_state:n %}
+
+            {% if state == 'full' %}
+                <span class="star-full">&#9733;</span>
+            {% elif state == 'half' %}
+                <span class="star-half">&#9733;</span>
+            {% else %}
+                <span class="star-empty">&#9733;</span>
+            {% endif %}
+
+        {% endwith %}
+
+    {% endfor %}
+
+</span>
+
+{% if review_count is not None %}
+    <span class="rating-count text-muted">
+        {% if review_count %}
+            ({{ review_count }} review{{ review_count|pluralize }})
+        {% else %}
+            (No reviews yet)
+        {% endif %}
+    </span>
+{% endif %}

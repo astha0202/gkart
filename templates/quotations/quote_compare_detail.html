@@ -1,0 +1,269 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Detailed Quotation Comparison</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+
+    <style>
+
+        body {
+            background: #f7f8fa;
+        }
+
+        .compare-container {
+            max-width: 1250px;
+            margin: 40px auto;
+        }
+
+        .compare-table {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .compare-table thead th {
+            background: #f5f6f8;
+            border-bottom: 2px solid #e3e5e9;
+        }
+
+        .field-label {
+            width: 220px;
+            font-weight: 600;
+            background: #fafbfc;
+        }
+
+        .best-col {
+            background: #f2fbf4;
+        }
+
+        thead .best-col {
+            background: #e3f6e8;
+        }
+
+        .best-flag {
+            display: inline-block;
+            background: #28a745;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-top: 5px;
+        }
+
+        .recommendation {
+            background: #eaf7ee;
+            border: 1px solid #bcdfc7;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 26px;
+        }
+
+        .row-total td {
+            font-size: 17px;
+            font-weight: 700;
+            background: #fbfbfc;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+{% include "extend-files/navbar.html" %}
+
+
+<div class="container compare-container">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
+
+        <div>
+            <h2 class="mb-1">Detailed Comparison</h2>
+            <p class="text-muted mb-0">
+                Every field of every vendor response, side by side.
+            </p>
+        </div>
+
+        <a href="{% url 'quote_compare' request_group %}"
+           class="btn btn-outline-secondary">
+            ← Back to summary
+        </a>
+
+    </div>
+
+
+    {% if best %}
+
+        <div class="recommendation">
+            <strong>Best for you: {{ best.quote.vendor.business_name }}</strong>
+            <p class="mb-0">{{ best.reason }}</p>
+        </div>
+
+    {% endif %}
+
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            Requested items
+        </div>
+
+        <div class="card-body">
+
+            <ul class="mb-0">
+                {% for item in items %}
+                    <li>
+                        {{ item.product.product_name }} &times; {{ item.quantity }}
+                        <span class="text-muted">
+                            (listed at ₹{{ item.listed_price }} by {{ item.quote.vendor.business_name }})
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-responsive compare-table">
+
+        <table class="table table-bordered mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th class="field-label">Field</th>
+
+                    {% for row in rows %}
+
+                        <th class="{% if row.is_best %}best-col{% endif %}">
+
+                            {{ row.quote.vendor.business_name }}
+
+                            <div class="small text-muted">{{ row.rank_label }}</div>
+
+                            {% if row.is_best %}
+                                <div><span class="best-flag">BEST FOR YOU</span></div>
+                            {% endif %}
+
+                        </th>
+
+                    {% endfor %}
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for line in matrix %}
+
+                    <tr {% if line.label == 'Total' %}class="row-total"{% endif %}>
+
+                        <td class="field-label">{{ line.label }}</td>
+
+                        {% for cell in line.values %}
+
+                            <td class="{% if cell.is_best %}best-col{% endif %}">
+                                {% if cell.value != None and cell.value != '' %}
+                                    {{ cell.value }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                        {% endfor %}
+
+                    </tr>
+
+                {% endfor %}
+
+
+                <tr>
+
+                    <td class="field-label">Per-item pricing</td>
+
+                    {% for row in rows %}
+
+                        <td class="{% if row.is_best %}best-col{% endif %}">
+                            {% for item in row.quote.items.all %}
+                                <div>
+                                    {{ item.product.product_name }} &times;
+                                    {{ item.quantity }} @
+                                    ₹{{ item.effective_price }} =
+                                    <strong>₹{{ item.line_total }}</strong>
+                                </div>
+                            {% endfor %}
+                        </td>
+
+                    {% endfor %}
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="field-label">Action</td>
+
+                    {% for row in rows %}
+
+                        <td>
+
+                            <a href="{% url 'quote_detail' row.quote.quote_number %}"
+                               class="btn btn-sm {% if row.is_best %}btn-success{% else %}btn-outline-primary{% endif %}">
+                                Open {{ row.quote.quote_number }}
+                            </a>
+
+                        </td>
+
+                    {% endfor %}
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <h5 class="mt-4 mb-3">Item-by-Item Rate Comparison Matrix</h5>
+
+    {% include "quotations/partials/item_matrix.html" with rows=rows item_matrix=item_matrix %}
+
+
+    <p class="text-muted small mt-3">
+        Rows showing "—" mean the vendor has not supplied that detail yet.
+        Quotations still awaiting a response are priced from the listed prices
+        and are marked Pending.
+    </p>
+
+
+</div>
+
+{% include "extend-files/footer.html" %}
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
